@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <title>Flask_Chat_App</title>
+  </head>
+  <body>  
+    <div id="firstChoice">
+      <script> 
+
+        function showForm(choice) {
+          var joinForm = document.getElementById("joinGame");
+          var createForm = document.getElementById("createGame");
+          var choiceButtons = document.getElementById("firstChoice");
+
+          choiceButtons.style.display = choiceButtons.style.display == "none" ? "block" : "none";
+
+          switch(choice) {
+            case "create":
+              createForm.style.display = createForm.style.display == "none" ? "block" : "block";
+              break;
+            case "join":
+              joinForm.style.display = joinForm.style.display == "none" ? "block" : "block"; 
+              break;
+            }
+          }
+
+      </script>
+      <Button onclick="showForm('create')">Create Session</Button>
+      <Button onclick="showForm('join')">Join Session</Button>
+    </div>
+
+    <div style="display:none" id="joinGame">
+      <form action="" method="POST">
+        <label for="sessionId">Session ID</label>
+        <input name="sessionId" id="sessionId" required><br>
+        <label for="username">Username</label>
+        <input name="username" id="username" required><br>
+        <label for="password">Password</label>
+        <input type="password" name="password" id="password" required><br>
+        <input type="submit"/>
+      </form>
+    </div>
+
+    <div style="display:none" id="createGame">
+      <form action="" method="POST">
+        <label for="username">Username</label>
+        <input name="username" id="username" required><br>
+        <label for="password">Password</label>
+        <input type="password" name="password" id="password" required><br>
+        <input type="submit"/>
+      </form>
+    </div>
+
+      
+  </body>
+  </html>
