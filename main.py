@@ -10,7 +10,12 @@ app.register_blueprint(auth.bp)
 
 @app.route('/')
 @login_required
-def sessions():
+def main():
+	return render_template('session.html')
+
+@app.route('/session/<string:id>', methods=("GET","POST"))
+@login_required
+def sessions(id):
     return render_template('session.html')
 
 def messageReceived(methods=['GET', 'POST']):

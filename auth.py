@@ -30,28 +30,31 @@ def enterGame():
         except:
             pass
         if session_id is None:
-            session_id = get_random_alphaNumeric_string(5)
-            db.createSession({'code':session_id,
+            session_code = get_random_alphaNumeric_string(5)
+            db.createSession({'code':session_code,
                             'users':[]})
-            print('session created: ' + session_id)
+            print('session created: ' + session_code)
 
         if username is None:
             error = 'Please provide a username. You can make one up.'
 
         else:
-            gameSession = db.fetchOne({'code':session_id})
+            gameSession = db.fetchOne({'code':session_code})
             session.clear()
             if username in gameSession['users']:
                 if not check_password_hash(users[username], password):
                     error = 'Incorrect password.'
             else:
                 gameSession['users'].append({username:generate_password_hash(password)})
-                db.updateOne({'code':session_id},{'$set':{'users':gameSession['users']}})
+                db.updateOne({'code':session_code},{'$set':{'users':gameSession['users']}})
+
+        session_id = str(gameSession['_id'])
 
         if error is None:
             session['user_id'] = username
+            session['session_code'] = session_code
             session['session_id'] = session_id
-            return redirect(url_for('sessions'))
+            return redirect( url_for('sessions', id=session_id))
 
         flash(error)
 
@@ -67,6 +70,7 @@ def logout():
 def load_logged_in_user():
     user_id = session.get('user_id')
     session_id = session.get('session_id')
+    session_code = session.get('session_code')
 
     if user_id is None:
         g.user = None
@@ -74,6 +78,7 @@ def load_logged_in_user():
         print('getting user info')
         g.user = user_id
         g.session_id = session_id
+        g.session_code = session_code
 
 def login_required(view):
     @functools.wraps(view)
