@@ -4,16 +4,16 @@
     <title>Flask_Chat_App</title>
   </head>
   <body>
-  	 <ul>
+     <ul>
       <li><a href="{{ url_for('auth.logout') }}">Log Out</a>
-  	</ul>
+    </ul>
 
-	  {% block content %}
-	  	{% if g.session_id %}
-		  <h2>Game Code</h2>
-		  <h3>{{ g.session_code }}</h3>
-		{% endif %}
-	  {% endblock %}
+    {% block content %}
+      {% if g.session_id %}
+      <h2>Game Code</h2>
+      <h3>{{ g.session_code }}</h3>
+    {% endif %}
+    {% endblock %}
 
     <h3 style='color: #ccc;font-size: 30px;'>No message yet..</h3>
     <div class="message_holder"></div>
@@ -29,11 +29,23 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
     <script type="text/javascript">
       var socket = io.connect('http://' + document.domain + ':' + location.port);
+      var session_id = 
 
       socket.on( 'connect', function() {
         socket.emit( 'my event', {
           data: 'User Connected'
-        } )
+        } );
+
+        console.log('Creating game...');
+        socket.emit('create', {
+          data: '{{ g.session_id }}'
+        });
+
+        // message handler for the 'join_room' channel
+        socket.on('join_room', function(msg) {
+            console.log(msg);
+        });
+
         var form = $( 'form' ).on( 'submit', function( e ) {
           e.preventDefault()
           let user_name = $( 'input.username' ).val()
@@ -45,6 +57,8 @@
           $( 'input.message' ).val( '' ).focus()
         } )
       } )
+
+
       socket.on( 'my response', function( msg ) {
         console.log( msg )
         if( typeof msg.user_name !== 'undefined' ) {

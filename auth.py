@@ -23,13 +23,14 @@ def enterGame():
         password = request.form['password']
 
         error = None
-        session_id = None
+        session_code = None
 
         try:
-            session_id = request.form['sessionId']
+            session_code = request.form['session_code']
+            print('session found: ' + session_code)
         except:
-            pass
-        if session_id is None:
+            print('no code found')
+        if session_code is None:
             session_code = get_random_alphaNumeric_string(5)
             db.createSession({'code':session_code,
                             'users':[]})
