@@ -37,11 +37,11 @@ def create_room(data):
 def on_join(data):
     """Join a game lobby"""
     room = data['room']
-    if room in ROOMS:
+    if room in active_rooms:
         # add player and rebroadcast game object
         # rooms[room].add_player(username)
         join_room(room)
-        send(ROOMS[room].to_json(), room=room)
+        send(actie_rooms[room].to_json(), room=room)
     else:
         emit('error', {'error': 'Unable to join room. Room does not exist.'})
 

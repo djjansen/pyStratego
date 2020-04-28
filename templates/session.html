@@ -8,14 +8,9 @@
       <li><a href="{{ url_for('auth.logout') }}">Log Out</a>
     </ul>
 
-    {% block content %}
-      {% if g.session_id %}
       <h2>Game Code</h2>
-      <h3>{{ g.session_code }}</h3>
-    {% endif %}
-    {% endblock %}
-
-    <h3 style='color: #ccc;font-size: 30px;'>No message yet..</h3>
+      <h3>{{ session.get('session_code') }}</h3>
+S
     <div class="message_holder"></div>
 
     <form action="" method="POST">
@@ -62,7 +57,6 @@
       socket.on( 'my response', function( msg ) {
         console.log( msg )
         if( typeof msg.user_name !== 'undefined' ) {
-          $( 'h3' ).remove()
           $( 'div.message_holder' ).append( '<div><b style="color: #000">'+msg.user_name+'</b> '+msg.message+'</div>' )
         }
       })
