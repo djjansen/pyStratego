@@ -10,11 +10,19 @@
 
       <h2>Game Code</h2>
       <h3>{{ session.get('session_code') }}</h3>
-S
-    <div class="message_holder"></div>
+
+    <div class="message_holder">
+      {% block content %}
+          <!-- {% if g.messages %} -->
+            {% for message in g.messages %}
+            <div><b style="color: #000">{{ message['user_name'] }}  </b>
+            {{ message['message'] }}</div>
+            {% endfor %}
+          <!-- {% endif %} -->
+      {% endblock %}
+    </div>
 
     <form action="" method="POST">
-      <input type="text" class="username" placeholder="User Name"/>
       <input type="text" class="message" placeholder="Messages"/>
       <input type="submit"/>
     </form>
@@ -43,7 +51,7 @@ S
 
         var form = $( 'form' ).on( 'submit', function( e ) {
           e.preventDefault()
-          let user_name = $( 'input.username' ).val()
+          let user_name = '{{ session.get("user_id") }}'
           let user_input = $( 'input.message' ).val()
           socket.emit( 'my event', {
             user_name : user_name,

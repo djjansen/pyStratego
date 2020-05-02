@@ -33,7 +33,8 @@ def enterGame():
         if session_code is None:
             session_code = get_random_alphaNumeric_string(5)
             db.createSession({'code':session_code,
-                            'users':[]})
+                            'users':[],
+                            'messages':[]})
             print('session created: ' + session_code)
 
         if username is None:
