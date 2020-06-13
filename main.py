@@ -11,6 +11,22 @@ socketio = SocketIO(app)
 app.register_blueprint(auth.bp)
 active_rooms=[]
 
+#Board class with one object
+
+class board:
+    def __init__(self):
+        self.status = 'preparation'
+        self.grid = {chr(alpha):{num+1:"x" for num in range(10)} for alpha in range(ord("A"),ord("K"))}
+        
+    def updateGrid(self,origin,destination):
+        
+        def replaceValue(inputVar,newValue):
+            self.grid[inputVar["X"]][inputVar["Y"]] = newValue
+            
+        replaceValue(origin,"")
+        replaceValue(destination,"%")
+
+board = board()
 
 @app.route('/')
 @login_required
@@ -22,9 +38,8 @@ def main():
 def sessions(id):
 	room = session.get('session_id')
 	messages = db.fetchOne({'_id': ObjectId(room)})['messages']
+	session['board_state'] = board.grid
 	g.messages = [message for message in messages if len(message) == 2]
-	print('...................')
-	print(g.messages)
 	return render_template('session.html')
 
 def messageReceived(methods=['GET', 'POST']):
@@ -52,7 +67,7 @@ def on_join(data):
     else:
         emit('error', {'error': 'Unable to join room. Room does not exist.'})
 
-@socketio.on('my event')
+@socketio.on('chat message')
 def handle_my_custom_event(json, methods=['GET', 'POST']):
     print('received my event: ' + str(json))
     room = session.get('session_id')
@@ -61,6 +76,12 @@ def handle_my_custom_event(json, methods=['GET', 'POST']):
     print(gameSession)
     gameSession['messages'].append(json)
     db.updateOne({'_id': ObjectId(room)},{'$set':{'messages':gameSession['messages']}})
+
+@socketio.on('board state')
+def handle_my_custom_event(json, methods=['GET', 'POST']):
+	print('received board state: ' + str(json))
+	room = session.get('session_id')
+	socketio.emit('board state', json, callback=messageReceived,room=room)
 
 
 if __name__ == '__main__':

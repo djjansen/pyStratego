@@ -1,6 +1,15 @@
 <!DOCTYPE html>
   <html lang="en">
   <head>
+    <style>
+      table, th, td {
+        border: 1px solid black;
+        border-collapse: collapse;
+      }
+      .click a {
+        display: block;
+      }
+  </style>
     <title>Flask_Chat_App</title>
   </head>
   <body>
@@ -10,6 +19,43 @@
 
       <h2>Game Code</h2>
       <h3>{{ session.get('session_code') }}</h3>
+      <table id="grid" border="1px solid black" border-collapse="collapse" width="80%" cellpadding=20px>
+            <tr>
+                <th></th>
+              {% for n in range(10) %}
+                <th>{{ n+1 }}</th>
+              {% endfor %}
+            </tr>
+          {% for row in session.get('board_state') %}
+            <tr>
+                <td>{{ row }}</td>
+            {% for cell in session.get('board_state')[row] %}
+                <td><{{ session.get('board_state')[row][cell] }}</td>
+            {% endfor %}
+            </tr>
+          {% endfor %}
+      </table>
+      <script>
+      function changeColor(evt){
+      var clickedOn = evt.target;
+      // for HTML
+      clickedOn.style.backgroundColor = '#f00';
+      }
+      var grid = document.getElementById("grid");
+      for (var i = 0, row; row = grid.rows[i]; i++) {
+         //iterate through rows
+         //rows would be accessed using the "row" variable assigned in the for loop
+         for (var j = 0, col; col = row.cells[j]; j++) {
+           //iterate through columns
+           //columns would be accessed using the "col" variable assigned in the for loop
+           col.addEventListener('click',changeColor,false);
+           console.log('working')
+         }  
+      }
+      for (var i = 0, cell; cell = grid.cells[i]; i++) {
+
+        }
+      </script>
 
     <div class="message_holder">
       {% block content %}
@@ -53,7 +99,7 @@
           e.preventDefault()
           let user_name = '{{ session.get("user_id") }}'
           let user_input = $( 'input.message' ).val()
-          socket.emit( 'my event', {
+          socket.emit( 'chat message', {
             user_name : user_name,
             message : user_input
           } )
@@ -68,6 +114,11 @@
           $( 'div.message_holder' ).append( '<div><b style="color: #000">'+msg.user_name+'</b> '+msg.message+'</div>' )
         }
       })
+
+      socket.on( 'board states', function( msg ) {
+        console.log( msg )
+        }
+      )
     </script>
 
   </body>
