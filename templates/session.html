@@ -9,6 +9,25 @@
       .click a {
         display: block;
       }
+      table {
+        width: 90%;
+      }
+      td {
+        width: 9.09%;
+        position: relative;
+      }
+      td:after {
+        content: '';
+        display: block;
+        margin-top: 100%;
+      }
+      td .content {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+      }
   </style>
     <title>Flask_Chat_App</title>
   </head>
@@ -16,10 +35,14 @@
      <ul>
       <li><a href="{{ url_for('auth.logout') }}">Log Out</a>
     </ul>
-
       <h2>Game Code</h2>
       <h3>{{ session.get('session_code') }}</h3>
-      <table id="grid" border="1px solid black" border-collapse="collapse" width="80%" cellpadding=20px>
+      <!-- table for piece not on the board -->
+      
+      <table border="1px solid black" border-collapse="collapse">
+      </table>
+      <!-- Table for game board -->
+      <table id="grid" border="1px solid black" border-collapse="collapse" width="90%">
             <tr>
                 <th></th>
               {% for n in range(10) %}
@@ -28,9 +51,9 @@
             </tr>
           {% for row in session.get('board_state') %}
             <tr>
-                <td>{{ row }}</td>
+                <td><div class="square"><div class="content">{{ row }}</div></div></td>
             {% for cell in session.get('board_state')[row] %}
-                <td><{{ session.get('board_state')[row][cell] }}</td>
+                <td><div class="square"><div class="content">{{ session.get('board_state')[row][cell] }}</div></div></td>
             {% endfor %}
             </tr>
           {% endfor %}
@@ -42,19 +65,16 @@
       clickedOn.style.backgroundColor = '#f00';
       }
       var grid = document.getElementById("grid");
-      for (var i = 0, row; row = grid.rows[i]; i++) {
+      for (var i = 1, row; row = grid.rows[i]; i++) {
          //iterate through rows
          //rows would be accessed using the "row" variable assigned in the for loop
-         for (var j = 0, col; col = row.cells[j]; j++) {
+         console.log(i)
+         for (var j = 1, col; col = row.cells[j]; j++) {
            //iterate through columns
            //columns would be accessed using the "col" variable assigned in the for loop
-           col.addEventListener('click',changeColor,false);
-           console.log('working')
+           col.querySelector('.square').addEventListener('click',changeColor,false);
          }  
       }
-      for (var i = 0, cell; cell = grid.cells[i]; i++) {
-
-        }
       </script>
 
     <div class="message_holder">

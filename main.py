@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, flash, session, g, Blueprint
+from flask import Flask, render_template, request, redirect,url_for, flash, session, g, Blueprint
 from flask_socketio import SocketIO, join_room, leave_room
 from bson.objectid import ObjectId
 import auth
@@ -16,7 +16,7 @@ active_rooms=[]
 class board:
     def __init__(self):
         self.status = 'preparation'
-        self.grid = {chr(alpha):{num+1:"x" for num in range(10)} for alpha in range(ord("A"),ord("K"))}
+        self.grid = {chr(alpha):{num+1:"" for num in range(10)} for alpha in range(ord("A"),ord("K"))}
         
     def updateGrid(self,origin,destination):
         
@@ -33,7 +33,7 @@ board = board()
 @app.route('/')
 @login_required
 def main():
-	redirect(url_for('sessions',id=session.get('session_id')))
+	return redirect(url_for('sessions',id=session.get('session_id')))
 
 #session page route, adds session id to endpoint
 #1. fetches session document from db, saves messages to g
