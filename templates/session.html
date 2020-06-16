@@ -59,11 +59,33 @@
           {% endfor %}
       </table>
       <script>
-      function changeColor(evt){
+      function extractData(target) {
+      target.classList.add("selected");
+      window.transfer_payload = target.innerHTML;
+      console.log(transfer_payload);
+      }
+
+      function loadData(target) {
+      target.innerHTML = window.transfer_payload;
+      delete window.transfer_payload;
+      }
+
+      function handleData(evt) {
       var clickedOn = evt.target;
+      if (typeof window.transfer_payload !== 'undefined') {
+        loadData(clickedOn);
+
+      } else {
+        extractData(clickedOn);
+      }}
+
+      function changeColor(evt){
+      var clickedOn= evt.target;
       // for HTML
       clickedOn.style.backgroundColor = '#f00';
       }
+
+
       var grid = document.getElementById("grid");
       for (var i = 1, row; row = grid.rows[i]; i++) {
          //iterate through rows
@@ -72,7 +94,7 @@
          for (var j = 1, col; col = row.cells[j]; j++) {
            //iterate through columns
            //columns would be accessed using the "col" variable assigned in the for loop
-           col.querySelector('.square').addEventListener('click',changeColor,false);
+           col.querySelector('.square').addEventListener('click',handleData,false);
          }  
       }
       </script>
