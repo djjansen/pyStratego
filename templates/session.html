@@ -9,7 +9,7 @@
       .click a {
         display: block;
       }
-      table {
+      .board table {
         width: 90%;
       }
       td {
@@ -39,10 +39,20 @@
       <h3>{{ session.get('session_code') }}</h3>
       <!-- table for piece not on the board -->
       
-      <table border="1px solid black" border-collapse="collapse">
+      <table id="chest" border="1px solid black" border-collapse="collapse" width="25%">
+            <tr>
+                <td><div class="square"><div class="content">2</div></div></td>
+                <td><div class="square"><div class="content">1</div></div></td>
+                <td><div class="square"><div class="content">S</div></div></td>
+            </tr>
+            <tr>
+                <td><div class="square"><div class="content">4</div></div></td>
+                <td><div class="square"><div class="content">2</div></div></td>
+                <td><div class="square"><div class="content">B</div></div></td>
+            </tr>
       </table>
       <!-- Table for game board -->
-      <table id="grid" border="1px solid black" border-collapse="collapse" width="90%">
+      <table id="grid" class="board" border="1px solid black" border-collapse="collapse" width="90%">
             <tr>
                 <th></th>
               {% for n in range(10) %}
@@ -51,9 +61,9 @@
             </tr>
           {% for row in session.get('board_state') %}
             <tr>
-                <td><div class="square"><div class="content">{{ row }}</div></div></td>
+                <td class="board"><div class="square"><div class="content">{{ row }}</div></div></td>
             {% for cell in session.get('board_state')[row] %}
-                <td><div class="square"><div class="content">{{ session.get('board_state')[row][cell] }}</div></div></td>
+                <td class="board"><div class="square"><div class="content">{{ session.get('board_state')[row][cell] }}</div></div></td>
             {% endfor %}
             </tr>
           {% endfor %}
@@ -68,6 +78,9 @@
       function loadData(target) {
       target.innerHTML = window.transfer_payload;
       delete window.transfer_payload;
+      var origin = document.getElementsByClassName("selected")[0]
+      origin.classList.remove("selected");
+      origin.innerHTML = "";
       }
 
       function handleData(evt) {
@@ -92,6 +105,17 @@
          //rows would be accessed using the "row" variable assigned in the for loop
          console.log(i)
          for (var j = 1, col; col = row.cells[j]; j++) {
+           //iterate through columns
+           //columns would be accessed using the "col" variable assigned in the for loop
+           col.querySelector('.square').addEventListener('click',handleData,false);
+         }  
+      }
+      var chest = document.getElementById("chest");
+      for (var i = 0, row; row = chest.rows[i]; i++) {
+         //iterate through rows
+         //rows would be accessed using the "row" variable assigned in the for loop
+         console.log(i)
+         for (var j = 0, col; col = row.cells[j]; j++) {
            //iterate through columns
            //columns would be accessed using the "col" variable assigned in the for loop
            col.querySelector('.square').addEventListener('click',handleData,false);

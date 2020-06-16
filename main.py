@@ -16,7 +16,7 @@ active_rooms=[]
 class board:
     def __init__(self):
         self.status = 'preparation'
-        self.grid = {chr(alpha):{num+1:num for num in range(10)} for alpha in range(ord("A"),ord("K"))}
+        self.grid = {chr(alpha):{num+1:"" for num in range(10)} for alpha in range(ord("A"),ord("K"))}
         
     def updateGrid(self,origin,destination):
         
