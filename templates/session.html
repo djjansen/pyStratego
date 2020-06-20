@@ -39,17 +39,21 @@
       <h3>{{ session.get('session_code') }}</h3>
       <!-- table for piece not on the board -->
       
-      <table id="chest" border="1px solid black" border-collapse="collapse" width="25%">
-            <tr>
-                <td><div class="square"><div class="content">2</div></div></td>
-                <td><div class="square"><div class="content">1</div></div></td>
-                <td><div class="square"><div class="content">S</div></div></td>
-            </tr>
-            <tr>
-                <td><div class="square"><div class="content">4</div></div></td>
-                <td><div class="square"><div class="content">2</div></div></td>
-                <td><div class="square"><div class="content">B</div></div></td>
-            </tr>
+      <table id="chest" border="1px solid black" border-collapse="collapse" width="90%">
+            {% set i = [] %}
+            {% for piece in session.get('pieces_reference') %}
+            {% if session.get('pieces_reference').index(piece) == 0 %}
+              <tr>
+            {% endif %}
+            {% for x in range(piece[1]) %}
+            {% set __ = i.append(1) %}
+              <td><div class="square"><div class="content">{{ piece[0] }}</div></div></td>
+            {% if i|length % 10 == 0 %}
+              </tr><tr>
+            {% endif %}
+            {% endfor %}
+            {% endfor %}
+              </tr>
       </table>
       <!-- Table for game board -->
       <table id="grid" class="board" border="1px solid black" border-collapse="collapse" width="90%">

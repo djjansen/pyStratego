@@ -28,6 +28,26 @@ class board:
 
 #create board object
 board = board()
+#create list of piece objects and quanitities needed
+class piece:
+    def __init__(self,rank,weakness,movementRange,maxQuantity):
+        self.weakness = weakness
+        self.rank = rank
+        self.movementRange = movementRange
+        self.maxQuantity = maxQuantity
+        
+pieces_reference = {"B":piece(0,"8",0,6),
+					"1":piece(1,"",1,1),
+                    "2":piece(2,"",1,1),
+                    "3":piece(3,"",1,2),
+                    "4":piece(4,"",1,3),
+                    "5":piece(5,"",1,4),
+                    "6":piece(6,"",1,4),
+                    "7":piece(7,"",1,4),
+                    "8":piece(8,"B",1,5),
+                    "9":piece(9,"",9,8),
+                    "S":piece(10,"",1,1),
+                    "#":piece(11,"",0,1)}
 
 #main route, redirects to appropriate session page if logged in
 @app.route('/')
@@ -45,6 +65,7 @@ def sessions(id):
 	room = session.get('session_id')
 	messages = db.fetchOne({'_id': ObjectId(room)})['messages']
 	session['board_state'] = board.grid
+	session['pieces_reference'] = [(key,pieces_reference[key].maxQuantity) for key in pieces_reference]
 	g.messages = [message for message in messages if len(message) == 2]
 	return render_template('session.html')
 
