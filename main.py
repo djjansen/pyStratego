@@ -104,6 +104,7 @@ def handle_my_custom_event(json, methods=['GET', 'POST']):
 	print('received board state: ' + str(json))
 	room = session.get('session_id')
 	board_state = session.get('board_state')
+	board_state = {row:{key:value for key, value in sorted(board_state[row].items(), key=lambda item: int(item[0]))} for row in board_state}
 	origin_row = json['origin_cell'][0]
 	origin_col = json['origin_cell'][1]
 	destination_row = json['destination_cell'][0]
@@ -114,6 +115,7 @@ def handle_my_custom_event(json, methods=['GET', 'POST']):
 	socketio.emit('my response', json, callback=messageReceived,room=room)
 	gameSession = db.fetchOne({'_id': ObjectId(room)})
 	db.updateOne({'_id': ObjectId(room)},{'$set':{'board_state':board_state}})
+	session['board_state'] = board_state
 
 #when this file is run, start flask-socketio app
 if __name__ == '__main__':
