@@ -12,22 +12,6 @@ socketio = SocketIO(app)
 app.register_blueprint(auth.bp)
 active_rooms=[]
 
-#Board class with one object, initializes in prep mode with empty grid
-class board:
-    def __init__(self):
-        self.status = 'preparation'
-        self.grid = {chr(alpha):{num+1:"" for num in range(10)} for alpha in range(ord("A"),ord("K"))}
-        
-    def updateGrid(self,origin,destination):
-        
-        def replaceValue(inputVar,newValue):
-            self.grid[inputVar["X"]][inputVar["Y"]] = newValue
-            
-        replaceValue(origin,"")
-        replaceValue(destination,"%")
-
-#create board object
-board = board()
 #create list of piece objects and quanitities needed
 class piece:
     def __init__(self,rank,weakness,movementRange,maxQuantity):
@@ -64,9 +48,11 @@ def main():
 def sessions(id):
 	room = session.get('session_id')
 	messages = db.fetchOne({'_id': ObjectId(room)})['messages']
-	session['board_state'] = board.grid
 	session['pieces_reference'] = [(key,pieces_reference[key].maxQuantity) for key in pieces_reference]
+	session['board_state'] = db.fetchOne({'_id': ObjectId(room)})['board_state']
 	g.messages = [message for message in messages if len(message) == 2]
+	g.board_state = db.fetchOne({'_id': ObjectId(room)})['board_state']
+	print(g.board_state)
 	return render_template('session.html')
 
 #callback function used in socket emits later
@@ -107,7 +93,6 @@ def handle_my_custom_event(json, methods=['GET', 'POST']):
     room = session.get('session_id')
     socketio.emit('my response', json, callback=messageReceived,room=room)
     gameSession = db.fetchOne({'_id': ObjectId(room)})
-    print(gameSession)
     gameSession['messages'].append(json)
     db.updateOne({'_id': ObjectId(room)},{'$set':{'messages':gameSession['messages']}})
 
@@ -118,7 +103,17 @@ def handle_my_custom_event(json, methods=['GET', 'POST']):
 def handle_my_custom_event(json, methods=['GET', 'POST']):
 	print('received board state: ' + str(json))
 	room = session.get('session_id')
-	socketio.emit('board state', json, callback=messageReceived,room=room)
+	board_state = session.get('board_state')
+	origin_row = json['origin_cell'][0]
+	origin_col = json['origin_cell'][1]
+	destination_row = json['destination_cell'][0]
+	destination_col = json['destination_cell'][1]
+	if json['origin_cell'] != ['','']:
+		board_state[origin_row][origin_col] = ""
+	board_state[destination_row][destination_col] = json['moved_piece']
+	socketio.emit('my response', json, callback=messageReceived,room=room)
+	gameSession = db.fetchOne({'_id': ObjectId(room)})
+	db.updateOne({'_id': ObjectId(room)},{'$set':{'board_state':board_state}})
 
 #when this file is run, start flask-socketio app
 if __name__ == '__main__':

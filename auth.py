@@ -7,6 +7,24 @@ from flask import (
     )
 from werkzeug.security import check_password_hash, generate_password_hash
 
+#Board class with one object, initializes in prep mode with empty grid
+class board:
+    def __init__(self):
+        self.status = 'preparation'
+        self.grid = {chr(alpha):{str(num+1):"" for num in range(10)} for alpha in range(ord("A"),ord("K"))}
+        
+    def updateGrid(self,origin,destination):
+        
+        def replaceValue(inputVar,newValue):
+            self.grid[inputVar["X"]][inputVar["Y"]] = newValue
+            
+        replaceValue(origin,"")
+        replaceValue(destination,"%")
+
+#create board object
+board = board()
+
+
 #Used to generate game codes
 def get_random_alphaNumeric_string(stringLength=5):
     lettersAndDigits = string.ascii_letters + string.digits
@@ -34,8 +52,10 @@ def enterGame():
             session_code = get_random_alphaNumeric_string(5)
             db.createSession({'code':session_code,
                             'users':[],
+                            'board_state':board.grid,
                             'messages':[]})
             print('session created: ' + session_code)
+            print(board.grid)
 
         if username is None:
             error = 'Please provide a username. You can make one up.'
