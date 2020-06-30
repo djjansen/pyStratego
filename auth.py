@@ -11,7 +11,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 class board:
     def __init__(self):
         self.status = 'preparation'
-        self.grid = {chr(alpha):{str(num+1):"" for num in range(10)} for alpha in range(ord("A"),ord("K"))}
+        self.grid = {chr(alpha):{str(num+1):{'color':'none','piece':""} for num in range(10)} for alpha in range(ord("A"),ord("K"))}
         
     def updateGrid(self,origin,destination):
         
@@ -64,10 +64,14 @@ def enterGame():
             gameSession = db.fetchOne({'code':session_code})
             session.clear()
             if username in gameSession['users']:
-                if not check_password_hash(users[username], password):
+                if not check_password_hash(users[username]['password'], password):
                     error = 'Incorrect password.'
             else:
-                gameSession['users'].append({username:generate_password_hash(password)})
+                if len(gameSession['users']) == 1:
+                    color = 'red'
+                else:
+                    color = 'blue'
+                gameSession['users'].append({username:{'password':generate_password_hash(password),'color':color}})
                 db.updateOne({'code':session_code},{'$set':{'users':gameSession['users']}})
 
         session_id = str(gameSession['_id'])
@@ -76,6 +80,7 @@ def enterGame():
             session['user_id'] = username
             session['session_code'] = session_code
             session['session_id'] = session_id
+            session['color'] = str(color)
             return redirect( url_for('sessions', id=session_id))
 
         flash(error)

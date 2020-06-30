@@ -67,7 +67,7 @@
             <tr id = {{ row }} >
                 <td class="board"><div class="square"><div class="content">{{ row }}</div></div></td>
             {% for cell in session.get('board_state')[row] %}
-                {% set cellContent =  session.get('board_state')[row][cell] %}
+                {% set cellContent =  session.get('board_state')[row][cell]['piece'] %}
                 <td class="board" id= {{ cell }} ><div class="square"><div class="content">{{ cellContent }}</div></div></td>
             {% endfor %}
             </tr>
@@ -85,13 +85,14 @@
       var origin = document.getElementsByClassName("selected")[0]
       var origin_coords = [origin.parentNode.parentNode.parentNode.id,origin.parentNode.parentNode.id];
       var target_coords = [target.parentNode.parentNode.parentNode.id,target.parentNode.parentNode.id];
+      var team = "{{ session.get('color') }}";
       console.log
       origin.classList.remove("selected");
       origin.innerHTML = "";
       socket.emit( 'board state', {
             origin_cell : origin_coords,
             destination_cell : target_coords,
-            moved_piece : window.transfer_payload
+            moved_piece : {'team':team,'piece':window.transfer_payload}
           });
       console.log('transfer');
       delete window.transfer_payload;
