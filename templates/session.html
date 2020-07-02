@@ -12,6 +12,9 @@
       .board table {
         width: 90%;
       }
+      .blue {
+        background-color: blue;
+      }
       td {
         width: 9.09%;
         position: relative;
@@ -21,7 +24,14 @@
         display: block;
         margin-top: 100%;
       }
-      td .content {
+      .square {
+        display: table;
+      }
+      .content {
+        font-size:7vw;
+        color:white;
+        text-align:center;
+        vertical-align: bottom;
         position: absolute;
         top: 0;
         bottom: 0;
@@ -37,7 +47,7 @@
     </ul>
       <h2>Game Code</h2>
       <h3>{{ session.get('session_code') }}</h3>
-      <!-- table for piece not on the board -->
+      <!-- table for pieces not on the board -->
       
       <table id="chest" border="1px solid black" border-collapse="collapse" width="90%">
             {% set i = [] %}
@@ -47,7 +57,7 @@
             {% endif %}
             {% for x in range(piece[1]) %}
             {% set __ = i.append(1) %}
-              <td><div class="square"><div class="content">{{ piece[0] }}</div></div></td>
+              <td><div class="square"><div class="content blue">{{ piece[0] }}</div></div></td>
             {% if i|length % 10 == 0 %}
               </tr><tr>
             {% endif %}
@@ -68,7 +78,11 @@
                 <td class="board"><div class="square"><div class="content">{{ row }}</div></div></td>
             {% for cell in session.get('board_state')[row] %}
                 {% set cellContent =  session.get('board_state')[row][cell]['piece'] %}
-                <td class="board" id= {{ cell }} ><div class="square"><div class="content">{{ cellContent }}</div></div></td>
+                <td class="board" id= {{ cell }} ><div class="square"><div class="content {{ session.get('board_state')[row][cell]['color'] }}">
+                {% if session.get('board_state')[row][cell]['color'] == session.get('color') %}
+                  {{ cellContent }}
+                {% endif %}
+                </div></div></td>
             {% endfor %}
             </tr>
           {% endfor %}
@@ -86,8 +100,9 @@
       var origin_coords = [origin.parentNode.parentNode.parentNode.id,origin.parentNode.parentNode.id];
       var target_coords = [target.parentNode.parentNode.parentNode.id,target.parentNode.parentNode.id];
       var team = "{{ session.get('color') }}";
+      target.classList.add(team);
       console.log
-      origin.classList.remove("selected");
+      origin.classList.remove("selected","blue","red");
       origin.innerHTML = "";
       socket.emit( 'board state', {
             origin_cell : origin_coords,

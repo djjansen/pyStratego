@@ -104,14 +104,17 @@ def handle_my_custom_event(json, methods=['GET', 'POST']):
 	print('received board state: ' + str(json))
 	room = session.get('session_id')
 	board_state = session.get('board_state')
-	board_state = {row:{key:{value['color']:value['piece']} for key, value in sorted(board_state[row].items(), key=lambda item: int(item[0]))} for row in board_state}
+	board_state = {row:{key:{'color':value['color'],'piece':value['piece']} for key, value in sorted(board_state[row].items(), key=lambda item: int(item[0]))} for row in board_state}
 	origin_row = json['origin_cell'][0]
 	origin_col = json['origin_cell'][1]
 	destination_row = json['destination_cell'][0]
 	destination_col = json['destination_cell'][1]
 	if json['origin_cell'] != ['','']:
 		board_state[origin_row][origin_col] = ""
+	print(json)
 	board_state[destination_row][destination_col]['piece'] = json['moved_piece']['piece']
+	board_state[destination_row][destination_col]['color'] = json['moved_piece']['team']
+	print(board_state)
 	socketio.emit('my response', json, callback=messageReceived,room=room)
 	gameSession = db.fetchOne({'_id': ObjectId(room)})
 	db.updateOne({'_id': ObjectId(room)},{'$set':{'board_state':board_state}})
