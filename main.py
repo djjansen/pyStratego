@@ -12,27 +12,6 @@ socketio = SocketIO(app)
 app.register_blueprint(auth.bp)
 active_rooms=[]
 
-#create list of piece objects and quanitities needed
-class piece:
-    def __init__(self,rank,weakness,movementRange,maxQuantity):
-        self.weakness = weakness
-        self.rank = rank
-        self.movementRange = movementRange
-        self.maxQuantity = maxQuantity
-        
-pieces_reference = {"B":piece(0,"8",0,6),
-					"1":piece(1,"",1,1),
-                    "2":piece(2,"",1,1),
-                    "3":piece(3,"",1,2),
-                    "4":piece(4,"",1,3),
-                    "5":piece(5,"",1,4),
-                    "6":piece(6,"",1,4),
-                    "7":piece(7,"",1,4),
-                    "8":piece(8,"B",1,5),
-                    "9":piece(9,"",9,8),
-                    "S":piece(10,"",1,1),
-                    "#":piece(11,"",0,1)}
-
 #main route, redirects to appropriate session page if logged in
 @app.route('/')
 @login_required
@@ -47,12 +26,11 @@ def main():
 @login_required
 def sessions(id):
 	room = session.get('session_id')
-	messages = db.fetchOne({'_id': ObjectId(room)})['messages']
-	session['pieces_reference'] = [(key,pieces_reference[key].maxQuantity) for key in pieces_reference]
-	session['board_state'] = db.fetchOne({'_id': ObjectId(room)})['board_state']
+	sessionObject = db.fetchOne({'_id': ObjectId(room)})
+	messages = sessionObject['messages']
+	session['unplaced_pieces'] = sessionObject['unplaced_pieces'][session['user_id']]
+	session['board_state'] = g.board_state = sessionObject['board_state']
 	g.messages = [message for message in messages if len(message) == 2]
-	g.board_state = db.fetchOne({'_id': ObjectId(room)})['board_state']
-	print(g.board_state)
 	return render_template('session.html')
 
 #callback function used in socket emits later
@@ -102,6 +80,7 @@ def handle_my_custom_event(json, methods=['GET', 'POST']):
 @socketio.on('board state')
 def handle_my_custom_event(json, methods=['GET', 'POST']):
 	print('received board state: ' + str(json))
+	username = session['user_id']
 	room = session.get('session_id')
 	board_state = session.get('board_state')
 	board_state = {row:{key:{'color':value['color'],'piece':value['piece']} for key, value in sorted(board_state[row].items(), key=lambda item: int(item[0]))} for row in board_state}
@@ -111,14 +90,26 @@ def handle_my_custom_event(json, methods=['GET', 'POST']):
 	destination_col = json['destination_cell'][1]
 	if json['origin_cell'] != ['','']:
 		board_state[origin_row][origin_col] = ""
-	print(json)
+	else:
+		unplaced_pieces = session.get('unplaced_pieces')
+		print(unplaced_pieces)
+		print(json)
+		for piece in unplaced_pieces:
+			if piece[0] == json['moved_piece']['piece']:
+				piece[1] -= 1
+
+
+
 	board_state[destination_row][destination_col]['piece'] = json['moved_piece']['piece']
 	board_state[destination_row][destination_col]['color'] = json['moved_piece']['team']
-	print(board_state)
+
 	socketio.emit('my response', json, callback=messageReceived,room=room)
+
 	gameSession = db.fetchOne({'_id': ObjectId(room)})
-	db.updateOne({'_id': ObjectId(room)},{'$set':{'board_state':board_state}})
+	gameSession['unplaced_pieces'][username] = unplaced_pieces
+	db.updateOne({'_id': ObjectId(room)},{'$set':{'board_state':board_state,'unplaced_pieces':gameSession['unplaced_pieces']}})
 	session['board_state'] = board_state
+	session['unplaced_pieces'] = unplaced_pieces
 
 #when this file is run, start flask-socketio app
 if __name__ == '__main__':

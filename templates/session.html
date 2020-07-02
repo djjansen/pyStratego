@@ -15,6 +15,9 @@
       .blue {
         background-color: blue;
       }
+      .red {
+        background-color: red;
+      }
       td {
         width: 9.09%;
         position: relative;
@@ -42,6 +45,7 @@
     <title>Flask_Chat_App</title>
   </head>
   <body>
+    <h1>{{ session.get('user_id') }}</h1>
      <ul>
       <li><a href="{{ url_for('auth.logout') }}">Log Out</a>
     </ul>
@@ -51,13 +55,13 @@
       
       <table id="chest" border="1px solid black" border-collapse="collapse" width="90%">
             {% set i = [] %}
-            {% for piece in session.get('pieces_reference') %}
-            {% if session.get('pieces_reference').index(piece) == 0 %}
+            {% for piece in session.get('unplaced_pieces') %}
+            {% if session.get('unplaced_pieces').index(piece) == 0 %}
               <tr>
             {% endif %}
             {% for x in range(piece[1]) %}
             {% set __ = i.append(1) %}
-              <td><div class="square"><div class="content blue">{{ piece[0] }}</div></div></td>
+              <td><div class="square"><div class="content {{ session.get('color') }}">{{ piece[0] }}</div></div></td>
             {% if i|length % 10 == 0 %}
               </tr><tr>
             {% endif %}
@@ -117,7 +121,6 @@
       var clickedOn = evt.target;
       if (typeof window.transfer_payload !== 'undefined') {
         loadData(clickedOn);
-
       } else {
         extractData(clickedOn);
       }}
@@ -209,13 +212,11 @@
         console.log("breakpoint")
         if( typeof msg.user_name !== 'undefined' ) {
           $( 'div.message_holder' ).append( '<div><b style="color: #000">'+msg.user_name+'</b> '+msg.message+'</div>' )
+        } else {
+          console.log( 'yayyyyy')
         }
       })
-
-      socket.on( 'board states', function( msg ) {
-        console.log( msg )
-        }
-      )
+      
     </script>
 
   </body>

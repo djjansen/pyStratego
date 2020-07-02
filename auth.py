@@ -24,6 +24,27 @@ class board:
 #create board object
 board = board()
 
+#create list of piece objects and quanitities needed
+class piece:
+    def __init__(self,rank,weakness,movementRange,maxQuantity):
+        self.weakness = weakness
+        self.rank = rank
+        self.movementRange = movementRange
+        self.maxQuantity = maxQuantity
+        
+pieces_reference = {"B":piece(0,"8",0,6),
+                    "1":piece(1,"",1,1),
+                    "2":piece(2,"",1,1),
+                    "3":piece(3,"",1,2),
+                    "4":piece(4,"",1,3),
+                    "5":piece(5,"",1,4),
+                    "6":piece(6,"",1,4),
+                    "7":piece(7,"",1,4),
+                    "8":piece(8,"B",1,5),
+                    "9":piece(9,"",9,8),
+                    "S":piece(10,"",1,1),
+                    "#":piece(11,"",0,1)}
+
 
 #Used to generate game codes
 def get_random_alphaNumeric_string(stringLength=5):
@@ -53,9 +74,9 @@ def enterGame():
             db.createSession({'code':session_code,
                             'users':[],
                             'board_state':board.grid,
+                            'unplaced_pieces':{},
                             'messages':[]})
             print('session created: ' + session_code)
-            print(board.grid)
 
         if username is None:
             error = 'Please provide a username. You can make one up.'
@@ -72,7 +93,8 @@ def enterGame():
                 else:
                     color = 'blue'
                 gameSession['users'].append({username:{'password':generate_password_hash(password),'color':color}})
-                db.updateOne({'code':session_code},{'$set':{'users':gameSession['users']}})
+                gameSession['unplaced_pieces'].update( {username:[(key,pieces_reference[key].maxQuantity) for key in pieces_reference]})
+                db.updateOne({'code':session_code},{'$set':{'users':gameSession['users'],'unplaced_pieces':gameSession['unplaced_pieces']}})
 
         session_id = str(gameSession['_id'])
 
@@ -80,7 +102,7 @@ def enterGame():
             session['user_id'] = username
             session['session_code'] = session_code
             session['session_id'] = session_id
-            session['color'] = str(color)
+            session['color'] = color
             return redirect( url_for('sessions', id=session_id))
 
         flash(error)
