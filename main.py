@@ -78,7 +78,7 @@ def handle_my_custom_event(json, methods=['GET', 'POST']):
 #1. get room from session id
 #2. send board state...incomplete
 @socketio.on('board state')
-def handle_my_custom_event(json, methods=['GET', 'POST']):
+def handle_board_state_change(json, methods=['GET', 'POST']):
 	print('received board state: ' + str(json))
 	username = session['user_id']
 	room = session.get('session_id')
@@ -92,13 +92,9 @@ def handle_my_custom_event(json, methods=['GET', 'POST']):
 		board_state[origin_row][origin_col] = ""
 	else:
 		unplaced_pieces = session.get('unplaced_pieces')
-		print(unplaced_pieces)
-		print(json)
 		for piece in unplaced_pieces:
 			if piece[0] == json['moved_piece']['piece']:
 				piece[1] -= 1
-
-
 
 	board_state[destination_row][destination_col]['piece'] = json['moved_piece']['piece']
 	board_state[destination_row][destination_col]['color'] = json['moved_piece']['team']
@@ -110,6 +106,15 @@ def handle_my_custom_event(json, methods=['GET', 'POST']):
 	db.updateOne({'_id': ObjectId(room)},{'$set':{'board_state':board_state,'unplaced_pieces':gameSession['unplaced_pieces']}})
 	session['board_state'] = board_state
 	session['unplaced_pieces'] = unplaced_pieces
+
+
+@socketio.on('opposing board sync')
+def sync_opposing_move(methods=['GET', 'POST']):
+	room = session.get('session_id')
+	gameSession = db.fetchOne({'_id': ObjectId(room)})
+	session['board_state'] = gameSession['board_state']
+	print('hiiiiiii')
+	print(session.get('board_state'))
 
 #when this file is run, start flask-socketio app
 if __name__ == '__main__':

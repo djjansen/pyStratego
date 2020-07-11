@@ -98,32 +98,36 @@
       console.log(transfer_payload);
       }
 
-      function loadData(target) {
-      target.innerHTML = window.transfer_payload;
+      function loadData(target,payload = window.transfer_payload) {
+      target.innerHTML = payload;
       var origin = document.getElementsByClassName("selected")[0]
-      var origin_coords = [origin.parentNode.parentNode.parentNode.id,origin.parentNode.parentNode.id];
+      if ( origin !== undefined ) {
+                var origin_coords = [origin.parentNode.parentNode.parentNode.id,origin.parentNode.parentNode.id];
+                origin.classList.remove("selected","blue","red");
+                origin.innerHTML = "";
+      };
+
       var target_coords = [target.parentNode.parentNode.parentNode.id,target.parentNode.parentNode.id];
       var team = "{{ session.get('color') }}";
       target.classList.add(team);
-      console.log
-      origin.classList.remove("selected","blue","red");
-      origin.innerHTML = "";
-      socket.emit( 'board state', {
+      delete window.transfer_payload;
+      return {
             origin_cell : origin_coords,
             destination_cell : target_coords,
-            moved_piece : {'team':team,'piece':window.transfer_payload}
-          });
-      console.log('transfer');
-      delete window.transfer_payload;
+            moved_piece : {'team':team,'piece':payload}
+          };
       }
 
       function handleData(evt) {
       var clickedOn = evt.target;
+      console.log(window.transfer_payload);
       if (typeof window.transfer_payload !== 'undefined') {
-        loadData(clickedOn);
+        socket.emit( 'board state', loadData(clickedOn) );
+
       } else {
         extractData(clickedOn);
       }}
+
 
       function changeColor(evt){
       var clickedOn= evt.target;
@@ -177,7 +181,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
     <script type="text/javascript">
       var socket = io.connect('http://' + document.domain + ':' + location.port);
-      var session_id = 
+      var session_id = "{{ session.get('session_id') }}";
 
       socket.on( 'connect', function() {
         socket.emit( 'my event', {
@@ -208,12 +212,24 @@
 
 
       socket.on( 'my response', function( msg ) {
-        console.log( msg )
-        console.log("breakpoint")
         if( typeof msg.user_name !== 'undefined' ) {
           $( 'div.message_holder' ).append( '<div><b style="color: #000">'+msg.user_name+'</b> '+msg.message+'</div>' )
-        } else {
-          console.log( 'yayyyyy')
+        } else if ( '{{ session.get('color') }}' !== msg['moved_piece']['team'] ) {
+          var origin_row = msg['origin_cell'][0];
+          var origin_col = msg['origin_cell'][1];
+          var destination_row = msg['destination_cell'][0];
+          var destination_col = msg['destination_cell'][1];
+          console.log(document.getElementById(destination_row).querySelector('#\\3' + destination_col + ' '));
+          document.getElementById(destination_row).querySelector('#\\3' + destination_col + ' ').classList.add( msg['moved_piece']['team']);
+          var offboard_origin = msg['origin_cell'].includes("");
+          if ( offboard_origin  === false) {
+            console.log(msg['origin_cell'].includes(""));
+            console.log('nooooooo');
+            extractData(document.getElementById(origin_row).querySelector('#\\3' + origin_col + ' ').querySelector('.square'));
+          }
+
+          loadData(document.getElementById(destination_row).querySelector('#\\3' + destination_col + ' ').querySelector('.square'),payload="");
+          socket.emit( 'opposing board sync' );
         }
       })
       
