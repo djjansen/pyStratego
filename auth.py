@@ -12,6 +12,14 @@ class board:
     def __init__(self):
         self.status = 'preparation'
         self.grid = {chr(alpha):{str(num+1):{'color':'none','piece':""} for num in range(10)} for alpha in range(ord("A"),ord("K"))}
+        self.grid['E']['3']['color'] = 'water'
+        self.grid['E']['4']['color'] = 'water'
+        self.grid['E']['7']['color'] = 'water'
+        self.grid['E']['8']['color'] = 'water'
+        self.grid['F']['3']['color'] = 'water'
+        self.grid['F']['4']['color'] = 'water'
+        self.grid['F']['7']['color'] = 'water'
+        self.grid['F']['8']['color'] = 'water'
         
     def updateGrid(self,origin,destination):
         

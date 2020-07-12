@@ -18,6 +18,9 @@
       .red {
         background-color: red;
       }
+      .water {
+        background-color: #03c6fc;
+      }
       td {
         width: 9.09%;
         position: relative;
@@ -33,6 +36,17 @@
       .content {
         font-size:7vw;
         color:white;
+        text-align:center;
+        vertical-align: bottom;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+      }
+      .row-header {
+        font-size:5vw;
+        color:black;
         text-align:center;
         vertical-align: bottom;
         position: absolute;
@@ -79,7 +93,7 @@
             </tr>
           {% for row in session.get('board_state') %}
             <tr id = {{ row }} >
-                <td class="board"><div class="square"><div class="content">{{ row }}</div></div></td>
+                <td class="board"><div class="square"><div class="row-header">{{ row }}</div></div></td>
             {% for cell in session.get('board_state')[row] %}
                 {% set cellContent =  session.get('board_state')[row][cell]['piece'] %}
                 <td class="board" id= {{ cell }} ><div class="square"><div class="content {{ session.get('board_state')[row][cell]['color'] }}">
