@@ -139,22 +139,27 @@
       }
 
       function handleData(evt) {
+      var team = "{{ session.get('color') }}";
       var clickedOn = evt.target;
-      console.log(window.transfer_payload);
-      if (typeof window.transfer_payload !== 'undefined') {
-        socket.emit( 'board state', loadData(clickedOn) );
 
+      // check if existing payload is in browser
+      if (typeof window.transfer_payload !== 'undefined') {
+        // check if user is trying to move piece to same square
+        if (clickedOn.classList.contains('selected') === false) {
+              if (clickedOn.classList.contains(team) === false) {
+                  socket.emit( 'board state', loadData(clickedOn) );
+                  return false;
+            } else {
+                  console.log('you already have a piece there')
+            }
+          }
+        // if move is invalid, get selected grid square, and remove class
+        document.getElementsByClassName("selected")[0].classList.remove("selected");
+        delete window.transfer_payload;
+        // if payload already does not exist, extract from grid square
       } else {
         extractData(clickedOn);
       }}
-
-
-      function changeColor(evt){
-      var clickedOn= evt.target;
-      // for HTML
-      clickedOn.style.backgroundColor = '#f00';
-      }
-
 
       var grid = document.getElementById("grid");
       for (var i = 1, row; row = grid.rows[i]; i++) {
