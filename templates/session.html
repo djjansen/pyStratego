@@ -89,6 +89,7 @@
             {% endfor %}
               </tr>
       </table>
+      <div id='invalid_move_message'><br></div>
       <!-- Table for game board -->
       <table id="grid" class="board" border="1px solid black" border-collapse="collapse" width="90%">
             <tr>
@@ -115,7 +116,6 @@
       function extractData(target) {
       target.classList.add("selected");
       window.transfer_payload = target.innerHTML;
-      console.log(transfer_payload);
       }
 
       function loadData(target,payload = window.transfer_payload) {
@@ -142,15 +142,24 @@
       var team = "{{ session.get('color') }}";
       var clickedOn = evt.target;
 
+      function setMessage(message) {
+        document.getElementById("invalid_move_message").innerHTML = message;
+      }
       // check if existing payload is in browser
       if (typeof window.transfer_payload !== 'undefined') {
         // check if user is trying to move piece to same square
         if (clickedOn.classList.contains('selected') === false) {
               if (clickedOn.classList.contains(team) === false) {
+                if (clickedOn.classList.contains('water') === false) {
                   socket.emit( 'board state', loadData(clickedOn) );
                   return false;
+                } else {
+                    setMessage('pieces don\'t float!');
+                    setTimeout(setMessage, 2000,'<br>');                  
+                }
             } else {
-                  console.log('you already have a piece there')
+                  setMessage('you already have a piece there');
+                  setTimeout(setMessage, 2000,'<br>');
             }
           }
         // if move is invalid, get selected grid square, and remove class
@@ -165,7 +174,6 @@
       for (var i = 1, row; row = grid.rows[i]; i++) {
          //iterate through rows
          //rows would be accessed using the "row" variable assigned in the for loop
-         console.log(i)
          for (var j = 1, col; col = row.cells[j]; j++) {
            //iterate through columns
            //columns would be accessed using the "col" variable assigned in the for loop
@@ -176,7 +184,6 @@
       for (var i = 0, row; row = chest.rows[i]; i++) {
          //iterate through rows
          //rows would be accessed using the "row" variable assigned in the for loop
-         console.log(i)
          for (var j = 0, col; col = row.cells[j]; j++) {
            //iterate through columns
            //columns would be accessed using the "col" variable assigned in the for loop
@@ -195,7 +202,6 @@
           <!-- {% endif %} -->
       {% endblock %}
     </div>
-
     <form action="" method="POST">
       <input type="text" class="message" placeholder="Messages"/>
       <input type="submit"/>
@@ -247,8 +253,6 @@
           document.getElementById(destination_row).querySelector('#' + CSS.escape(destination_col)).classList.add( msg['moved_piece']['team']);
           var offboard_origin = msg['origin_cell'].includes("");
           if ( offboard_origin  === false) {
-            console.log(msg['origin_cell'].includes(""));
-            console.log('nooooooo');
             extractData(document.getElementById(origin_row).querySelector('#' + CSS.escape(origin_col)).querySelector('.square'));
           }
 
