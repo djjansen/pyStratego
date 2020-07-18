@@ -66,6 +66,7 @@
   </head>
   <body>
     <h1>{{ session.get('user_id') }}</h1>
+    <div id="phase"></div>
      <ul>
       <li><a href="{{ url_for('auth.logout') }}">Log Out</a>
     </ul>
@@ -113,6 +114,12 @@
           {% endfor %}
       </table>
       <script>
+      var phase = "{{ session.get('phase') }}"
+      if (phase === 'preparation') {
+        document.getElementById("phase").innerHTML = "<h3>Set Your Pieces</h3>";
+      }
+      console.log(phase);
+
       function extractData(target) {
       target.classList.add("selected");
       window.transfer_payload = target.innerHTML;
@@ -147,6 +154,7 @@
       }
       // check if existing payload is in browser
       if (typeof window.transfer_payload !== 'undefined') {
+        
         // check if user is trying to move piece to same square
         if (clickedOn.classList.contains('selected') === false) {
               if (clickedOn.classList.contains(team) === false) {
@@ -170,26 +178,38 @@
         extractData(clickedOn);
       }}
 
-      var grid = document.getElementById("grid");
-      for (var i = 1, row; row = grid.rows[i]; i++) {
-         //iterate through rows
-         //rows would be accessed using the "row" variable assigned in the for loop
-         for (var j = 1, col; col = row.cells[j]; j++) {
-           //iterate through columns
-           //columns would be accessed using the "col" variable assigned in the for loop
-           col.querySelector('.square').addEventListener('click',handleData,false);
-         }  
+      function modifyGrid(table,modification=undefined) {
+        var grid = document.getElementById(table);
+
+        if (table == 'grid') {
+          rowStart = 1;
+        } else {
+          rowStart = 0;
+        }
+
+        if (modification == 'addListeners') {
+          function makeModification(square) {
+            square.addEventListener('click',handleData,false);
+          }
+        } else if (modification == 'highlightSquares') {
+          function makeModification(square) {
+            square.classList.add('out_of_range');
+          }
+        }
+
+        for (var i = rowStart, row; row = grid.rows[i]; i++) {
+          //iterate through rows
+          //rows would be accessed using the "row" variable assigned in the for loop
+          for (var j = rowStart, col; col = row.cells[j]; j++) {
+            //iterate through columns
+            //columns would be accessed using the "col" variable assigned in the for loop
+            makeModification(col.querySelector('.square'));
+          }  
+        }
       }
-      var chest = document.getElementById("chest");
-      for (var i = 0, row; row = chest.rows[i]; i++) {
-         //iterate through rows
-         //rows would be accessed using the "row" variable assigned in the for loop
-         for (var j = 0, col; col = row.cells[j]; j++) {
-           //iterate through columns
-           //columns would be accessed using the "col" variable assigned in the for loop
-           col.querySelector('.square').addEventListener('click',handleData,false);
-         }  
-      }
+
+      modifyGrid('grid',modification='addListeners');
+      modifyGrid('chest',modification='addListeners');
       </script>
 
     <div class="message_holder">

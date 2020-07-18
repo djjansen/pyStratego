@@ -79,9 +79,11 @@ def enterGame():
             print('no code found')
         if session_code is None:
             session_code = get_random_alphaNumeric_string(5)
+            phase = 'preparation'
             db.createSession({'code':session_code,
                             'users':[],
                             'board_state':board.grid,
+                            'phase':phase,
                             'unplaced_pieces':{},
                             'messages':[]})
             print('session created: ' + session_code)
@@ -111,6 +113,7 @@ def enterGame():
             session['session_code'] = session_code
             session['session_id'] = session_id
             session['color'] = color
+            session['phase'] = phase
             return redirect( url_for('sessions', id=session_id))
 
         flash(error)
