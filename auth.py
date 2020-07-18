@@ -105,6 +105,7 @@ def enterGame():
                 gameSession['users'].append({username:{'password':generate_password_hash(password),'color':color}})
                 gameSession['unplaced_pieces'].update( {username:[(key,pieces_reference[key].maxQuantity) for key in pieces_reference]})
                 db.updateOne({'code':session_code},{'$set':{'users':gameSession['users'],'unplaced_pieces':gameSession['unplaced_pieces']}})
+                phase = gameSession['phase']
 
         session_id = str(gameSession['_id'])
 

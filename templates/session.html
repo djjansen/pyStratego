@@ -199,7 +199,7 @@
         if (modification == 'addListeners') {
           function makeModification(square) {
             square.addEventListener('click',handleData,false);
-            if (square.querySelector('.content').classList.contains('blue') === false) {square.querySelector('.content').classList.add('empty');}
+            if (square.querySelector('.content').classList.contains('blue') === false && square.querySelector('.content').classList.contains('red') === false) {square.querySelector('.content').classList.add('empty');}
         }
         }
         else if (modification == 'highlightSquares') {
