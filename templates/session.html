@@ -164,11 +164,16 @@
         
         // check if user is trying to move piece to same square
         if (clickedOn.classList.contains('selected') === false) {
+              // check if user is trying to move where they already have another piece
               if (clickedOn.classList.contains(team) === false) {
+                // check if user is trying to move to the water
                 if (clickedOn.classList.contains('water') === false) {
-                  socket.emit( 'board state', loadData(clickedOn) );
-                  modifyGrid('grid',modification='clearHighlighting')
-                  return false;
+                  //send new board state to back end, render changes in client
+                  if (clickedOn.classList.contains('out_of_range') === false) {
+                    socket.emit( 'board state', loadData(clickedOn) );
+                    modifyGrid('grid',modification='clearHighlighting');
+                    return false;
+                  }
                 } else {
                     setMessage('pieces don\'t float!');
                     setTimeout(setMessage, 2000,'<br>');                  
@@ -204,7 +209,14 @@
         }
         else if (modification == 'highlightSquares') {
           function makeModification(square) {
-            square.querySelector('.content').classList.add('out_of_range');
+            if (phase == 'preparation') {
+              if (own_team == 'blue') {
+                if (i > 4) {square.querySelector('.content').classList.add('out_of_range');}
+              }
+              else if (own_team == 'red') {
+                if (i < 7) {square.querySelector('.content').classList.add('out_of_range');}
+              }
+            }
           }
         } else if (modification == 'clearHighlighting') {
           function makeModification(square) {
