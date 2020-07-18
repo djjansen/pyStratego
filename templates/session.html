@@ -21,6 +21,12 @@
       .water {
         background-color: #03c6fc;
       }
+      .empty {
+        background-color: antiquewhite;
+      }
+      .out_of_range {
+        filter: brightness(60%);
+      }
       .selected {
         transition: opacity .25s ease-in-out;
         -moz-transition: opacity .25s ease-in-out;
@@ -118,7 +124,6 @@
       if (phase === 'preparation') {
         document.getElementById("phase").innerHTML = "<h3>Set Your Pieces</h3>";
       }
-      console.log(phase);
 
       function extractData(target) {
       target.classList.add("selected");
@@ -131,12 +136,14 @@
       if ( origin !== undefined ) {
                 var origin_coords = [origin.parentNode.parentNode.parentNode.id,origin.parentNode.parentNode.id];
                 origin.classList.remove("selected","blue","red");
+                origin.classList.add('empty');
                 origin.innerHTML = "";
       };
 
       var target_coords = [target.parentNode.parentNode.parentNode.id,target.parentNode.parentNode.id];
       var team = "{{ session.get('color') }}";
       target.classList.add(team);
+      target.classList.remove('empty');
       delete window.transfer_payload;
       return {
             origin_cell : origin_coords,
@@ -160,6 +167,7 @@
               if (clickedOn.classList.contains(team) === false) {
                 if (clickedOn.classList.contains('water') === false) {
                   socket.emit( 'board state', loadData(clickedOn) );
+                  modifyGrid('grid',modification='clearHighlighting')
                   return false;
                 } else {
                     setMessage('pieces don\'t float!');
@@ -173,9 +181,10 @@
         // if move is invalid, get selected grid square, and remove class
         document.getElementsByClassName("selected")[0].classList.remove("selected");
         delete window.transfer_payload;
-        // if payload already does not exist, extract from grid square
+        // if payload does not already exist, extract from grid square
       } else {
         extractData(clickedOn);
+        modifyGrid('grid',modification='highlightSquares');
       }}
 
       function modifyGrid(table,modification=undefined) {
@@ -190,10 +199,16 @@
         if (modification == 'addListeners') {
           function makeModification(square) {
             square.addEventListener('click',handleData,false);
-          }
-        } else if (modification == 'highlightSquares') {
+            if (square.querySelector('.content').classList.contains('blue') === false) {square.querySelector('.content').classList.add('empty');}
+        }
+        }
+        else if (modification == 'highlightSquares') {
           function makeModification(square) {
-            square.classList.add('out_of_range');
+            square.querySelector('.content').classList.add('out_of_range');
+          }
+        } else if (modification == 'clearHighlighting') {
+          function makeModification(square) {
+            square.querySelector('.content').classList.remove('out_of_range');
           }
         }
 
