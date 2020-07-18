@@ -121,6 +121,7 @@
       </table>
       <script>
       var phase = "{{ session.get('phase') }}"
+      var own_team = "{{ session.get('color') }}";
       if (phase === 'preparation') {
         document.getElementById("phase").innerHTML = "<h3>Set Your Pieces</h3>";
       }
@@ -130,7 +131,7 @@
       window.transfer_payload = target.innerHTML;
       }
 
-      function loadData(target,payload = window.transfer_payload) {
+      function loadData(target,payload = window.transfer_payload,team=own_team) {
       target.innerHTML = payload;
       var origin = document.getElementsByClassName("selected")[0]
       if ( origin !== undefined ) {
@@ -141,7 +142,6 @@
       };
 
       var target_coords = [target.parentNode.parentNode.parentNode.id,target.parentNode.parentNode.id];
-      var team = "{{ session.get('color') }}";
       target.classList.add(team);
       target.classList.remove('empty');
       delete window.transfer_payload;
@@ -199,7 +199,7 @@
         if (modification == 'addListeners') {
           function makeModification(square) {
             square.addEventListener('click',handleData,false);
-            if (square.querySelector('.content').classList.contains('blue') === false && square.querySelector('.content').classList.contains('red') === false) {square.querySelector('.content').classList.add('empty');}
+            if (square.querySelector('.content').classList.contains('blue') === false && square.querySelector('.content').classList.contains('red') === false && square.querySelector('.content').classList.contains('water') === false) {square.querySelector('.content').classList.add('empty');}
         }
         }
         else if (modification == 'highlightSquares') {
@@ -285,13 +285,15 @@
           var origin_col = msg['origin_cell'][1];
           var destination_row = msg['destination_cell'][0];
           var destination_col = msg['destination_cell'][1];
-          document.getElementById(destination_row).querySelector('#' + CSS.escape(destination_col)).classList.add( msg['moved_piece']['team']);
+          var opposing_team = msg['moved_piece']['team'];
+          console.log(opposing_team);
+          document.getElementById(destination_row).querySelector('#' + CSS.escape(destination_col)).querySelector('.square').querySelector('.content').classList.add(opposing_team);
           var offboard_origin = msg['origin_cell'].includes("");
           if ( offboard_origin  === false) {
-            extractData(document.getElementById(origin_row).querySelector('#' + CSS.escape(origin_col)).querySelector('.square'));
+            extractData(document.getElementById(origin_row).querySelector('#' + CSS.escape(origin_col)).querySelector('.square').querySelector('.content'));
           }
 
-          loadData(document.getElementById(destination_row).querySelector('#' + CSS.escape(destination_col)).querySelector('.square'),payload="");
+          loadData(document.getElementById(destination_row).querySelector('#' + CSS.escape(destination_col)).querySelector('.square').querySelector('.content'),payload="",team=opposing_team);
           socket.emit( 'opposing board sync' );
         }
       })
