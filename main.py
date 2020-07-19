@@ -30,6 +30,7 @@ def sessions(id):
 	messages = sessionObject['messages']
 	session['unplaced_pieces'] = sessionObject['unplaced_pieces'][session['user_id']]
 	session['board_state'] = g.board_state = sessionObject['board_state']
+	session['phase'] = sessionObject['phase']
 	g.messages = [message for message in messages if len(message) == 2]
 	return render_template('session.html')
 
@@ -88,33 +89,53 @@ def handle_board_state_change(json, methods=['GET', 'POST']):
 	origin_col = json['origin_cell'][1]
 	destination_row = json['destination_cell'][0]
 	destination_col = json['destination_cell'][1]
+
+	unplaced_pieces = session.get('unplaced_pieces')
 	if json['origin_cell'] != ['','']:
 		board_state[origin_row][origin_col] = ""
 	else:
-		unplaced_pieces = session.get('unplaced_pieces')
 		for piece in unplaced_pieces:
 			if piece[0] == json['moved_piece']['piece']:
 				piece[1] -= 1
 
 	board_state[destination_row][destination_col]['piece'] = json['moved_piece']['piece']
 	board_state[destination_row][destination_col]['color'] = json['moved_piece']['team']
+	
+	
+	gameSession = db.fetchOne({'_id': ObjectId(room)})
+	current_phase = gameSession['phase']
+
+	total_pieces = 0
+	if current_phase == "preparation":
+		for user in gameSession['unplaced_pieces']:
+			for piece in gameSession['unplaced_pieces'][user]:
+				print(piece)
+				total_pieces += piece[1]
+	
+		print(total_pieces)
+
+		if total_pieces == 0:
+			current_phase = "blue"
+			print('condition met....')
+
+	json['phase'] = current_phase
 
 	socketio.emit('my response', json, callback=messageReceived,room=room)
 
-	gameSession = db.fetchOne({'_id': ObjectId(room)})
 	gameSession['unplaced_pieces'][username] = unplaced_pieces
-	db.updateOne({'_id': ObjectId(room)},{'$set':{'board_state':board_state,'unplaced_pieces':gameSession['unplaced_pieces']}})
+
+	db.updateOne({'_id': ObjectId(room)},{'$set':{'board_state':board_state,'unplaced_pieces':gameSession['unplaced_pieces'],'phase':current_phase}})
 	session['board_state'] = board_state
 	session['unplaced_pieces'] = unplaced_pieces
-
+	session['phase'] = current_phase
+	print(session.get('phase'))
 
 @socketio.on('opposing board sync')
 def sync_opposing_move(methods=['GET', 'POST']):
 	room = session.get('session_id')
 	gameSession = db.fetchOne({'_id': ObjectId(room)})
 	session['board_state'] = gameSession['board_state']
-	print('hiiiiiii')
-	print(session.get('board_state'))
+	session['phase'] = gameSession['phase']
 
 #when this file is run, start flask-socketio app
 if __name__ == '__main__':

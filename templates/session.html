@@ -120,9 +120,9 @@
           {% endfor %}
       </table>
       <script>
-      var phase = "{{ session.get('phase') }}"
+      window.phase = "{{ session.get('phase') }}"
       var own_team = "{{ session.get('color') }}";
-      if (phase === 'preparation') {
+      if (window.phase === 'preparation') {
         document.getElementById("phase").innerHTML = "<h3>Set Your Pieces</h3>";
       }
 
@@ -153,6 +153,7 @@
       }
 
       function handleData(evt) {
+      window.phase = "{{ session.get('phase') }}";
       var team = "{{ session.get('color') }}";
       var clickedOn = evt.target;
 
@@ -209,7 +210,7 @@
         }
         else if (modification == 'highlightSquares') {
           function makeModification(square) {
-            if (phase == 'preparation') {
+            if (window.phase == 'preparation') {
               if (own_team == 'blue') {
                 if (i > 4) {square.querySelector('.content').classList.add('out_of_range');}
               }
@@ -298,6 +299,7 @@
           var destination_row = msg['destination_cell'][0];
           var destination_col = msg['destination_cell'][1];
           var opposing_team = msg['moved_piece']['team'];
+          window.phase = msg['phase'];
           console.log(opposing_team);
           document.getElementById(destination_row).querySelector('#' + CSS.escape(destination_col)).querySelector('.square').querySelector('.content').classList.add(opposing_team);
           var offboard_origin = msg['origin_cell'].includes("");
