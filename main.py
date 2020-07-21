@@ -98,11 +98,14 @@ def handle_board_state_change(json, methods=['GET', 'POST']):
 			if piece[0] == json['moved_piece']['piece']:
 				piece[1] -= 1
 
+
+
 	board_state[destination_row][destination_col]['piece'] = json['moved_piece']['piece']
 	board_state[destination_row][destination_col]['color'] = json['moved_piece']['team']
 	
 	
 	gameSession = db.fetchOne({'_id': ObjectId(room)})
+	gameSession['unplaced_pieces'][username] = unplaced_pieces
 	current_phase = gameSession['phase']
 
 	total_pieces = 0
@@ -117,6 +120,12 @@ def handle_board_state_change(json, methods=['GET', 'POST']):
 		if total_pieces == 0:
 			current_phase = "blue"
 			print('condition met....')
+
+	elif current_phase == "blue":
+		current_phase = "red"
+	
+	elif current_phase == "red":
+		current_phase = "blue"
 
 	json['phase'] = current_phase
 

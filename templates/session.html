@@ -122,9 +122,24 @@
       <script>
       window.phase = "{{ session.get('phase') }}"
       var own_team = "{{ session.get('color') }}";
+
+      // determine which message to show user about current phase
+      function showPhase(phase) {
+      var phase_div = document.getElementById("phase");
       if (window.phase === 'preparation') {
-        document.getElementById("phase").innerHTML = "<h3>Set Your Pieces</h3>";
+        phase_div.innerHTML = "<h3>Set Your Pieces</h3>";
       }
+      else if (window.phase === own_team) {
+        phase_div.innerHTML = "<h3>Your Turn</h3>";
+      }
+      else if (window.phase !== "game_over") {
+        phase_div.innerHTML = "<h3>Opponent's Turn</h3>";
+      }   
+      }
+
+      // show phase when page loads
+      showPhase(window.phase);
+
 
       function extractData(target) {
       target.classList.add("selected");
@@ -148,7 +163,8 @@
       return {
             origin_cell : origin_coords,
             destination_cell : target_coords,
-            moved_piece : {'team':team,'piece':payload}
+            moved_piece : {'team':team,'piece':payload},
+            phase : window.phase
           };
       }
 
@@ -291,24 +307,31 @@
 
 
       socket.on( 'my response', function( msg ) {
-        if( typeof msg.user_name !== 'undefined' ) {
+        // check if response is chat message
+        if ( typeof msg.user_name !== 'undefined' ) {
           $( 'div.message_holder' ).append( '<div><b style="color: #000">'+msg.user_name+'</b> '+msg.message+'</div>' )
-        } else if ( '{{ session.get('color') }}' !== msg['moved_piece']['team'] ) {
-          var origin_row = msg['origin_cell'][0];
-          var origin_col = msg['origin_cell'][1];
-          var destination_row = msg['destination_cell'][0];
-          var destination_col = msg['destination_cell'][1];
-          var opposing_team = msg['moved_piece']['team'];
-          window.phase = msg['phase'];
-          console.log(opposing_team);
-          document.getElementById(destination_row).querySelector('#' + CSS.escape(destination_col)).querySelector('.square').querySelector('.content').classList.add(opposing_team);
-          var offboard_origin = msg['origin_cell'].includes("");
-          if ( offboard_origin  === false) {
-            extractData(document.getElementById(origin_row).querySelector('#' + CSS.escape(origin_col)).querySelector('.square').querySelector('.content'));
-          }
+        // otherwise handle as board state
+        } else {
+            // actions for both players when a board state is sent from back end
+            window.phase = msg['phase'];
+            showPhase(window.phase);
+            // handling of board states received by backend for opposing moves only
+            // modifies front end based on change
+            if ( '{{ session.get('color') }}' !== msg['moved_piece']['team'] ) {
+            var origin_row = msg['origin_cell'][0];
+            var origin_col = msg['origin_cell'][1];
+            var destination_row = msg['destination_cell'][0];
+            var destination_col = msg['destination_cell'][1];
+            var opposing_team = msg['moved_piece']['team'];
+            document.getElementById(destination_row).querySelector('#' + CSS.escape(destination_col)).querySelector('.square').querySelector('.content').classList.add(opposing_team);
+            var offboard_origin = msg['origin_cell'].includes("");
+            if ( offboard_origin  === false) {
+              extractData(document.getElementById(origin_row).querySelector('#' + CSS.escape(origin_col)).querySelector('.square').querySelector('.content'));
+            }
 
-          loadData(document.getElementById(destination_row).querySelector('#' + CSS.escape(destination_col)).querySelector('.square').querySelector('.content'),payload="",team=opposing_team);
-          socket.emit( 'opposing board sync' );
+            loadData(document.getElementById(destination_row).querySelector('#' + CSS.escape(destination_col)).querySelector('.square').querySelector('.content'),payload="",team=opposing_team);
+            socket.emit( 'opposing board sync' );
+            }
         }
       })
       
