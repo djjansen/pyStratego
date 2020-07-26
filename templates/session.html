@@ -134,7 +134,7 @@
       }
       else if (window.phase !== "game_over") {
         phase_div.innerHTML = "<h3>Opponent's Turn</h3>";
-      }   
+      }
       }
 
       // show phase when page loads
@@ -169,7 +169,6 @@
       }
 
       function handleData(evt) {
-      window.phase = "{{ session.get('phase') }}";
       var team = "{{ session.get('color') }}";
       var clickedOn = evt.target;
 
@@ -318,19 +317,19 @@
             // handling of board states received by backend for opposing moves only
             // modifies front end based on change
             if ( '{{ session.get('color') }}' !== msg['moved_piece']['team'] ) {
-            var origin_row = msg['origin_cell'][0];
-            var origin_col = msg['origin_cell'][1];
-            var destination_row = msg['destination_cell'][0];
-            var destination_col = msg['destination_cell'][1];
-            var opposing_team = msg['moved_piece']['team'];
-            document.getElementById(destination_row).querySelector('#' + CSS.escape(destination_col)).querySelector('.square').querySelector('.content').classList.add(opposing_team);
-            var offboard_origin = msg['origin_cell'].includes("");
-            if ( offboard_origin  === false) {
-              extractData(document.getElementById(origin_row).querySelector('#' + CSS.escape(origin_col)).querySelector('.square').querySelector('.content'));
-            }
+              var origin_row = msg['origin_cell'][0];
+              var origin_col = msg['origin_cell'][1];
+              var destination_row = msg['destination_cell'][0];
+              var destination_col = msg['destination_cell'][1];
+              var opposing_team = msg['moved_piece']['team'];
+              document.getElementById(destination_row).querySelector('#' + CSS.escape(destination_col)).querySelector('.square').querySelector('.content').classList.add(opposing_team);
+              var offboard_origin = msg['origin_cell'].includes("");
+              if ( offboard_origin  === false) {
+                extractData(document.getElementById(origin_row).querySelector('#' + CSS.escape(origin_col)).querySelector('.square').querySelector('.content'));
+              }
 
-            loadData(document.getElementById(destination_row).querySelector('#' + CSS.escape(destination_col)).querySelector('.square').querySelector('.content'),payload="",team=opposing_team);
-            socket.emit( 'opposing board sync' );
+              loadData(document.getElementById(destination_row).querySelector('#' + CSS.escape(destination_col)).querySelector('.square').querySelector('.content'),payload="",team=opposing_team);
+              socket.emit( 'opposing board sync' );
             }
         }
       })
