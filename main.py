@@ -84,7 +84,6 @@ def handle_board_state_change(json, methods=['GET', 'POST']):
 	username = session['user_id']
 	room = session.get('session_id')
 	board_state = session.get('board_state')
-	print(board_state)
 	board_state = {row:{key:{'color':value['color'],'piece':value['piece']} for key, value in sorted(board_state[row].items(), key=lambda item: int(item[0]))} for row in board_state}
 	origin_row = json['origin_cell'][0]
 	origin_col = json['origin_cell'][1]
@@ -93,7 +92,8 @@ def handle_board_state_change(json, methods=['GET', 'POST']):
 
 	unplaced_pieces = session.get('unplaced_pieces')
 	if json['origin_cell'] != ['','']:
-		board_state[origin_row][origin_col] = ""
+		board_state[origin_row][origin_col]['piece'] = ""
+		board_state[origin_row][origin_col]['team'] = "none"
 	else:
 		for piece in unplaced_pieces:
 			if piece[0] == json['moved_piece']['piece']:
