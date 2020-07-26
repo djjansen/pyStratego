@@ -84,6 +84,7 @@ def handle_board_state_change(json, methods=['GET', 'POST']):
 	username = session['user_id']
 	room = session.get('session_id')
 	board_state = session.get('board_state')
+	print(board_state)
 	board_state = {row:{key:{'color':value['color'],'piece':value['piece']} for key, value in sorted(board_state[row].items(), key=lambda item: int(item[0]))} for row in board_state}
 	origin_row = json['origin_cell'][0]
 	origin_col = json['origin_cell'][1]
