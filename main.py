@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect,url_for, flash, session, g, Blueprint
+from engineio.payload import Payload
 from flask_socketio import SocketIO, join_room, leave_room
 from bson.objectid import ObjectId
 import auth
@@ -6,6 +7,7 @@ import db
 from auth import login_required
 
 #app definition and config, see bottom of file for
+Payload.max_decode_packets = 500
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'vnkdjnfjknfl1232#'
 socketio = SocketIO(app)
@@ -146,6 +148,12 @@ def sync_opposing_move(methods=['GET', 'POST']):
 	gameSession = db.fetchOne({'_id': ObjectId(room)})
 	session['board_state'] = gameSession['board_state']
 	session['phase'] = gameSession['phase']
+
+@socketio.on('get range')
+def return_range(json, methods=['GET', 'POST']):
+	room = session.get('session_id')
+	board_state = session.get('board_state')
+	print(json)
 
 #when this file is run, start flask-socketio app
 if __name__ == '__main__':

@@ -202,19 +202,28 @@
         document.getElementsByClassName("selected")[0].classList.remove("selected");
         delete window.transfer_payload;
         // if payload does not already exist & square is controlled by own team, extract from grid square
-      } else if (clickedOn.classList.contains(team) && (window.phase === team || window.phase === "preparation")) {
+      } 
+      else if (clickedOn.classList.contains(team) && (window.phase === team || window.phase === "preparation")) {
         extractData(clickedOn);
-        modifyGrid('grid',modification='highlightSquares');
-      }}
-
-      function modifyGrid(table,modification=undefined) {
-        var grid = document.getElementById(table);
-
-        if (table == 'grid') {
-          rowStart = 1;
-        } else {
-          rowStart = 0;
+        if (clickedOn.classList.contains(team) && window.phase === team) {
+             var selected = document.getElementsByClassName("selected")[0];
+             if ( selected !== undefined ) {
+              var selected_coords = [selected.parentNode.parentNode.parentNode.id,selected.parentNode.parentNode.id];
+              socket.emit('get range', { 'coordinates': selected_coords });
+          }
         }
+        modifyGrid('grid',modification='highlightSquares');
+      }
+    }
+
+        function modifyGrid(table,modification=undefined) {
+          var grid = document.getElementById(table);
+
+          if (table == 'grid') {
+            rowStart = 1;
+          } else {
+            rowStart = 0;
+          }
 
         if (modification == 'addListeners') {
           function makeModification(square) {
@@ -231,7 +240,7 @@
               else if (own_team == 'red') {
                 if (i < 7) {square.querySelector('.content').classList.add('out_of_range');}
               }
-            }
+            } 
           }
         } else if (modification == 'clearHighlighting') {
           function makeModification(square) {
@@ -252,6 +261,7 @@
 
       modifyGrid('grid',modification='addListeners');
       modifyGrid('chest',modification='addListeners');
+
       </script>
 
     <div class="message_holder">
