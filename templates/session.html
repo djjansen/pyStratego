@@ -209,14 +209,14 @@
              var selected = document.getElementsByClassName("selected")[0];
              if ( selected !== undefined ) {
               var selected_coords = [selected.parentNode.parentNode.parentNode.id,selected.parentNode.parentNode.id];
-              socket.emit('get range', { 'coordinates': selected_coords });
+              socket.emit('get range', { 'coordinates': selected_coords, 'team': own_team });
           }
         }
         modifyGrid('grid',modification='highlightSquares');
       }
     }
 
-        function modifyGrid(table,modification=undefined) {
+        function modifyGrid(table,modification=undefined,movementRange=undefined) {
           var grid = document.getElementById(table);
 
           if (table == 'grid') {
@@ -226,13 +226,13 @@
           }
 
         if (modification == 'addListeners') {
-          function makeModification(square) {
+          function makeModification(square,movementRange) {
             square.addEventListener('click',handleData,false);
             if (square.querySelector('.content').classList.contains('blue') === false && square.querySelector('.content').classList.contains('red') === false && square.querySelector('.content').classList.contains('water') === false) {square.querySelector('.content').classList.add('empty');}
         }
         }
         else if (modification == 'highlightSquares') {
-          function makeModification(square) {
+          function makeModification(square,movementRange) {
             if (window.phase == 'preparation') {
               if (own_team == 'blue') {
                 if (i > 4) {square.querySelector('.content').classList.add('out_of_range');}
@@ -241,9 +241,14 @@
                 if (i < 7) {square.querySelector('.content').classList.add('out_of_range');}
               }
             } 
+            else if (window.phase == own_team) {
+              if (movementRange !== undefined) {
+                console.log('change me');
+              }
+            }
           }
         } else if (modification == 'clearHighlighting') {
-          function makeModification(square) {
+          function makeModification(square,movementRange) {
             square.querySelector('.content').classList.remove('out_of_range');
           }
         }
@@ -254,7 +259,7 @@
           for (var j = rowStart, col; col = row.cells[j]; j++) {
             //iterate through columns
             //columns would be accessed using the "col" variable assigned in the for loop
-            makeModification(col.querySelector('.square'));
+            makeModification(col.querySelector('.square'),movementRange);
           }  
         }
       }
@@ -340,6 +345,13 @@
               loadData(document.getElementById(destination_row).querySelector('#' + CSS.escape(destination_col)).querySelector('.square').querySelector('.content'),payload="",team=opposing_team);
               socket.emit( 'opposing board sync' );
             }
+        }
+      })
+
+      socket.on( 'return range', function( msg ) {
+        if (window.phase === own_team) {
+          console.log('next step');
+        modifyGrid('grid',modification='highlightSquares',movementRange=msg);
         }
       })
       

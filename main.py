@@ -7,7 +7,6 @@ import db
 from auth import login_required
 
 #app definition and config, see bottom of file for
-Payload.max_decode_packets = 500
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'vnkdjnfjknfl1232#'
 socketio = SocketIO(app)
@@ -95,7 +94,7 @@ def handle_board_state_change(json, methods=['GET', 'POST']):
 	unplaced_pieces = session.get('unplaced_pieces')
 	if json['origin_cell'] != ['','']:
 		board_state[origin_row][origin_col]['piece'] = ""
-		board_state[origin_row][origin_col]['team'] = "none"
+		board_state[origin_row][origin_col]['color'] = "none"
 	else:
 		for piece in unplaced_pieces:
 			if piece[0] == json['moved_piece']['piece']:
@@ -153,8 +152,80 @@ def sync_opposing_move(methods=['GET', 'POST']):
 def return_range(json, methods=['GET', 'POST']):
 	room = session.get('session_id')
 	board_state = session.get('board_state')
-	print(json)
 
+	selectedRow, selectedCol = json['coordinates'][0], json['coordinates'][1]
+	own_team = json['team']
+	print(json)
+	print(board_state)
+	selectedPiece = board_state[selectedRow][selectedCol]['piece']
+	moveRange = auth.pieces_reference[selectedPiece].movementRange
+
+	viableSquares = []
+	greaterBlockingRows = {'blocking':[75],'opposing':[74]}
+	lesserBlockingRows = {'blocking':[64],'opposing':[65]}
+	greaterBlockingCols = {'blocking':[11],'opposing':[10]}
+	lesserBlockingCols = {'blocking':[0],'opposing':[1]}
+
+	for row in board_state:
+		row_diff = ord(selectedRow) - ord(row)
+		print(row_diff)
+		if  abs(row_diff) <= moveRange and abs(row_diff) > 0:
+			if board_state[row][selectedCol]['color'] != "none":
+				if row_diff > 0:
+					if board_state[row][selectedCol]['color'] not in ['water',own_team]:
+						lesserBlockingRows['opposing'].append(ord(row))
+					else:
+						lesserBlockingRows['blocking'].append(ord(row))
+				elif row_diff < 0:
+					if board_state[row][selectedCol]['color'] not in ['water',own_team]:
+						greaterBlockingRows['opposing'].append(ord(row))
+					else:
+						greaterBlockingRows['blocking'].append(ord(row))
+
+			greaterBlockingRows['opposing'].sort()
+			print(greaterBlockingRows)
+			lesserBlockingRows['opposing'].sort()
+			print(lesserBlockingRows)
+
+			if board_state[row][selectedCol]['color'] not in ['water', own_team]:
+				if (ord(row) > max(lesserBlockingRows['blocking'])) and ord(row) < min(greaterBlockingRows['blocking']):
+					if (ord(row) >= lesserBlockingRows['opposing'][0]) and (ord(row) <= greaterBlockingRows['opposing'][0]):
+						viableSquares.append((row,selectedCol))
+		if row_diff == 0:
+			for num in range(int(selectedCol) - moveRange, int(selectedCol) + moveRange + 1):
+				if num in range(1,11):
+					if board_state[row][str(num)]['color'] != 'none':
+						if num > int(selectedCol):
+							if board_state[row][str(num)]['color'] not in ['water',own_team]:
+								greaterBlockingCols['opposing'].append(num)
+							else:
+								greaterBlockingCols['blocking'].append(num)
+						elif num < int(selectedCol):
+							if board_state[row][str(num)]['color'] not in ['water',own_team]:
+								lesserBlockingCols['opposing'].append(num)
+							else:
+								lesserBlockingCols['blocking'].append(num)
+					
+					greaterBlockingCols['opposing'].sort()
+					lesserBlockingCols['opposing'].sort()
+
+					if board_state[row][str(num)]['color'] not in [own_team,'water']:
+						if (num > max(lesserBlockingCols['blocking']) and (num < min(greaterBlockingCols['blocking']))):
+							if (num >= lesserBlockingCols['opposing'][0]) and (num <= greaterBlockingCols['opposing'][0]):
+								viableSquares.append((row,str(num)))
+
+	print('greater blocking cols')
+	print(greaterBlockingCols)
+	print('lesser blocking cols')
+	print(lesserBlockingCols)
+	print('greater blocking rows')
+	print(greaterBlockingRows)
+	print('lesser blocking rows')
+	print(lesserBlockingRows)
+	print('viable squares\n', viableSquares)
+
+
+	socketio.emit('return range', moveRange)
 #when this file is run, start flask-socketio app
 if __name__ == '__main__':
     socketio.run(app, debug=True)
