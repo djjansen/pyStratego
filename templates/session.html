@@ -177,8 +177,10 @@
       }
       // check if existing payload is in browser
       if (typeof window.transfer_payload !== 'undefined') {
+        console.log('step 1');
         // check if user is trying to move piece to same square
         if (clickedOn.classList.contains('selected') === false) {
+              console.log('wrong turn');
               // check if user is trying to move where they already have another piece
               if (clickedOn.classList.contains(team) === false) {
                 // check if user is trying to move to the water
@@ -187,6 +189,7 @@
                   if (clickedOn.classList.contains('out_of_range') === false) {
                     socket.emit( 'board state', loadData(clickedOn) );
                     modifyGrid('grid',modification='clearHighlighting');
+                    console.log('testing');
                     return false;
                   }
                 } else {
@@ -199,8 +202,10 @@
             }
           }
         // if move is invalid, get selected grid square, and remove class
+        console.log('step 2');
         document.getElementsByClassName("selected")[0].classList.remove("selected");
         delete window.transfer_payload;
+        modifyGrid('grid',modification='clearHighlighting');
         // if payload does not already exist & square is controlled by own team, extract from grid square
       } 
       else if (clickedOn.classList.contains(team) && (window.phase === team || window.phase === "preparation")) {
@@ -209,6 +214,7 @@
              var selected = document.getElementsByClassName("selected")[0];
              if ( selected !== undefined ) {
               var selected_coords = [selected.parentNode.parentNode.parentNode.id,selected.parentNode.parentNode.id];
+              window.transfer_payload = selected.innerHTML.trim();
               socket.emit('get range', { 'coordinates': selected_coords, 'team': own_team });
           }
         }
@@ -244,6 +250,9 @@
             else if (window.phase == own_team) {
               if (movementRange !== undefined) {
                 console.log('change me');
+                if (movementRange[i] == undefined || movementRange[i].includes(j) == false) {
+                  square.querySelector('.content').classList.add('out_of_range');
+                }
               }
             }
           }
