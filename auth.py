@@ -41,14 +41,14 @@ class piece:
         self.maxQuantity = maxQuantity
         
 pieces_reference = {"B":piece(0,"8",0,6),
-                    "1":piece(1,"",1,1),
+                    "1":piece(1,"S",1,1),
                     "2":piece(2,"",1,1),
                     "3":piece(3,"",1,2),
                     "4":piece(4,"",1,3),
                     "5":piece(5,"",1,4),
                     "6":piece(6,"",1,4),
                     "7":piece(7,"",1,4),
-                    "8":piece(8,"B",1,5),
+                    "8":piece(8,"",1,5),
                     "9":piece(9,"",9,8),
                     "S":piece(10,"",1,1),
                     "#":piece(11,"",0,1)}

@@ -100,10 +100,32 @@ def handle_board_state_change(json, methods=['GET', 'POST']):
 			if piece[0] == json['moved_piece']['piece']:
 				piece[1] -= 1
 
+	#if two pieces from different teams collide, do battle
 
+	def combat(piece1,piece2):
+		if auth.pieces_reference[piece1['piece']].weakness == piece2['piece']:
+			result = piece2
+		elif auth.pieces_reference[piece2['piece']].weakness == piece1['piece']:
+			result = piece1
+		elif auth.pieces_reference[piece1['piece']].rank < auth.pieces_reference[piece2['piece']].rank:
+			result = piece1
+		elif auth.pieces_reference[piece1['piece']].rank == auth.pieces_reference[piece2['piece']].rank:
+			result = {'piece':"",'color':'none'}
+		elif auth.pieces_reference[piece1['piece']].rank > auth.pieces_reference[piece2['piece']].rank:
+			result = piece2
 
-	board_state[destination_row][destination_col]['piece'] = json['moved_piece']['piece']
-	board_state[destination_row][destination_col]['color'] = json['moved_piece']['team']
+		return result
+
+	if board_state[destination_row][destination_col]['color'] not in ['none',json['moved_piece']['color']]:
+		new_piece = combat(json['moved_piece'],board_state[destination_row][destination_col])
+		json['moved_piece'] = new_piece
+		print(json)
+		socketio.emit('own combat result', json)
+		
+	else:
+		new_piece = json['moved_piece']
+
+	board_state[destination_row][destination_col] = new_piece
 	
 	
 	gameSession = db.fetchOne({'_id': ObjectId(room)})
@@ -130,7 +152,6 @@ def handle_board_state_change(json, methods=['GET', 'POST']):
 		current_phase = "blue"
 
 	json['phase'] = current_phase
-
 	socketio.emit('my response', json, callback=messageReceived,room=room)
 
 	gameSession['unplaced_pieces'][username] = unplaced_pieces
@@ -154,7 +175,7 @@ def return_range(json, methods=['GET', 'POST']):
 	board_state = session.get('board_state')
 
 	selectedRow, selectedCol = json['coordinates'][0], json['coordinates'][1]
-	own_team = json['team']
+	own_team = json['color']
 	print(json)
 	print(board_state)
 	selectedPiece = board_state[selectedRow][selectedCol]['piece']
