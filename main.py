@@ -59,9 +59,9 @@ def on_join(data):
     room = data['room']
     if room in active_rooms:
         join_room(room)
-        send(active_rooms[room].to_json(), room=room)
+        socketio.send(active_rooms[room].to_json(), room=room)
     else:
-        emit('error', {'error': 'Unable to join room. Room does not exist.'})
+        socketio.emit('error', {'error': 'Unable to join room. Room does not exist.'})
 
 #listener for chat messages
 #1. get room from session id
@@ -124,7 +124,7 @@ def handle_board_state_change(json, methods=['GET', 'POST']):
 			print('yay!')
 		json['moved_piece'] = new_piece
 		print(json)
-		socketio.emit('own combat result', json)
+		socketio.emit('own combat result', json, room=room)
 		
 	else:
 		new_piece = json['moved_piece']
@@ -136,7 +136,7 @@ def handle_board_state_change(json, methods=['GET', 'POST']):
 	# update unplaced pieces record
 	gameSession['unplaced_pieces'][username] = unplaced_pieces
 	current_phase = gameSession['phase']
-	
+
 	# sum up total pieces unplaced, change phases if necessary
 	total_pieces = 0
 	if current_phase == "preparation":
@@ -261,7 +261,7 @@ def return_range(json, methods=['GET', 'POST']):
 						addViableSquare(row_index,int(selectedCol))
 
 	# send final viable quares to client
-	socketio.emit('return range', viableSquares)
+	socketio.emit('return range', viableSquares, room=room)
 
 
 #when this file is run, start flask-socketio app
