@@ -8,7 +8,7 @@ from flask import (
 from werkzeug.security import check_password_hash, generate_password_hash
 
 #Board class with one object, initializes in prep mode with empty grid
-class board:
+class Board:
     def __init__(self):
         self.status = 'preparation'
         self.grid = {chr(alpha):{str(num+1):{'color':'none','piece':""} for num in range(10)} for alpha in range(ord("A"),ord("K"))}
@@ -30,28 +30,28 @@ class board:
         replaceValue(destination,"%")
 
 #create board object
-board = board()
+board = Board()
 
-#create list of piece objects and quanitities needed
-class piece:
+#create list of Piece objects and quanitities needed
+class Piece:
     def __init__(self,rank,weakness,movementRange,maxQuantity):
         self.weakness = weakness
         self.rank = rank
         self.movementRange = movementRange
         self.maxQuantity = maxQuantity
         
-pieces_reference = {"B":piece(0,"8",0,6),
-                    "1":piece(1,"S",1,1),
-                    "2":piece(2,"",1,1),
-                    "3":piece(3,"",1,2),
-                    "4":piece(4,"",1,3),
-                    "5":piece(5,"",1,4),
-                    "6":piece(6,"",1,4),
-                    "7":piece(7,"",1,4),
-                    "8":piece(8,"",1,5),
-                    "9":piece(9,"",9,8),
-                    "S":piece(10,"",1,1),
-                    "#":piece(11,"",0,1)}
+pieces_reference = {"B":Piece(0,"8",0,6),
+                    "1":Piece(1,"S",1,1),
+                    "2":Piece(2,"",1,1),
+                    "3":Piece(3,"",1,2),
+                    "4":Piece(4,"",1,3),
+                    "5":Piece(5,"",1,4),
+                    "6":Piece(6,"",1,4),
+                    "7":Piece(7,"",1,4),
+                    "8":Piece(8,"",1,5),
+                    "9":Piece(9,"",9,8),
+                    "S":Piece(10,"",1,1),
+                    "#":Piece(11,"",0,1)}
 
 
 #Used to generate game codes
@@ -64,11 +64,12 @@ def get_random_alphaNumeric_string(stringLength=5):
 bp = Blueprint('auth',__name__,url_prefix='/auth')
 
 @bp.route('/login', methods=('GET', 'POST'))
-def enterGame():
+def enterGame(username=None, password=None):
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-
+        if username is None:
+            username = request.form['username']
+        if password is None:
+            password=request.form['password']
         error = None
         session_code = None
 
@@ -79,12 +80,11 @@ def enterGame():
             print('no code found')
         if session_code is None:
             session_code = get_random_alphaNumeric_string(5)
-            phase = 'preparation'
             db.createSession({'code':session_code,
-                            'users':[],
-                            'board_state':board.grid,
-                            'phase':phase,
-                            'unplaced_pieces':{},
+                            'users':{},
+                            'board_state': board.grid,
+                            'phase': 'preparation',
+                            'unplaced_pieces': {},
                             'messages':[]})
             print('session created: ' + session_code)
 
@@ -94,15 +94,20 @@ def enterGame():
         else:
             gameSession = db.fetchOne({'code':session_code})
             session.clear()
+            # check if user exists in current session
             if username in gameSession['users']:
-                if not check_password_hash(users[username]['password'], password):
+                print('existing username found...')
+                session_id, color, phase = gameSession['_id'], gameSession['users'][username]['color'], gameSession['phase']
+                
+                if not check_password_hash(gameSession['users'][username]['password'], password):
                     error = 'Incorrect password.'
             else:
+                print('users\n', gameSession['users'])
                 if len(gameSession['users']) == 1:
                     color = 'red'
                 else:
                     color = 'blue'
-                gameSession['users'].append({username:{'password':generate_password_hash(password),'color':color}})
+                gameSession['users'].update({username:{'password':generate_password_hash(password),'color':color}})
                 gameSession['unplaced_pieces'].update( {username:[(key,pieces_reference[key].maxQuantity) for key in pieces_reference]})
                 db.updateOne({'code':session_code},{'$set':{'users':gameSession['users'],'unplaced_pieces':gameSession['unplaced_pieces']}})
                 phase = gameSession['phase']
@@ -110,11 +115,7 @@ def enterGame():
         session_id = str(gameSession['_id'])
 
         if error is None:
-            session['user_id'] = username
-            session['session_code'] = session_code
-            session['session_id'] = session_id
-            session['color'] = color
-            session['phase'] = phase
+            session['user_id'],session['session_code'], session['session_id'],session['color'], session['phase'] = username, session_code, session_id, color, phase
             return redirect( url_for('sessions', id=session_id))
 
         flash(error)
