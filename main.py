@@ -228,7 +228,7 @@ def return_range(json, methods=['GET', 'POST']):
 								lesserBlockingCols['blocking'].append(num)
 					
 			greaterBlockingCols['opposing'].sort()
-			lesserBlockingCols['opposing'].sort()
+			lesserBlockingCols['opposing'].sort(reverse=True)
 
 			for num in range(int(selectedCol) - moveRange, int(selectedCol) + moveRange + 1):
 				if num in range(1,11):
@@ -238,7 +238,7 @@ def return_range(json, methods=['GET', 'POST']):
 								addViableSquare(ord(row) - 64,num)
 
 		greaterBlockingRows['opposing'].sort()
-		lesserBlockingRows['opposing'].sort()
+		lesserBlockingRows['opposing'].sort(reverse=True)
 
 	for row in board_state:
 		row_diff = ord(selectedRow) - ord(row)
@@ -248,11 +248,9 @@ def return_range(json, methods=['GET', 'POST']):
 			if board_state[row][selectedCol]['color'] not in ['water', own_team]:
 				if (row_index > max(lesserBlockingRows['blocking'])) and row_index < min(greaterBlockingRows['blocking']):
 					if (row_index >= lesserBlockingRows['opposing'][0]) and (row_index <= greaterBlockingRows['opposing'][0]):
-						print('row\n',row_index,'lesser blocking\n',lesserBlockingRows['blocking'],'greater blocking\n',greaterBlockingRows['blocking'],
-									'lesser opposing\n',lesserBlockingRows['opposing'],'greater opposing\n',greaterBlockingRows)
 						addViableSquare(row_index,int(selectedCol))
 
-
+	print('lesser blocking rows\n', lesserBlockingRows)
 	print('viable squares\n', viableSquares)
 
 
