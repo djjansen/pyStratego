@@ -336,8 +336,12 @@
         // otherwise handle as board state
         } else {
             // actions for both players when a board state is sent from back end
+            if ( msg.game_over === true) { 
+              console.log('yay! game over.')
+            } else {
             window.phase = msg['phase'];
             showPhase(window.phase);
+            }
             // handling of board states received by backend for opposing moves only
             // modifies front end based on change
             console.log(msg);
