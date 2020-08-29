@@ -2,8 +2,10 @@ from flask import Flask, render_template, request, redirect,url_for, flash, sess
 from engineio.payload import Payload
 from flask_socketio import SocketIO, join_room, leave_room
 from bson.objectid import ObjectId
+import sys
 import auth
 import db
+import test_helper
 from auth import login_required
 
 #app definition and config, see bottom of file for
@@ -12,6 +14,10 @@ app.config['SECRET_KEY'] = 'vnkdjnfjknfl1232#'
 socketio = SocketIO(app)
 app.register_blueprint(auth.bp)
 active_rooms=[]
+
+# if test_helper is enabled, perform automated actions
+if 'test_helper' in sys.argv:
+	test_helper.create_game_after_prep()
 
 #main route, redirects to appropriate session page if logged in
 @app.route('/')
@@ -128,10 +134,7 @@ def handle_board_state_change(json, methods=['GET', 'POST']):
 		print(json)
 		socketio.emit('own combat result', json, room=room)
 		
-	else:
-		new_piece = json['moved_piece']
-
-	board_state[destination_row][destination_col] = new_piece
+	board_state[destination_row][destination_col] = json['moved_piece']
 	
 	# fetch room info from db
 	gameSession = db.fetchOne({'_id': ObjectId(room)})
@@ -171,6 +174,7 @@ def handle_board_state_change(json, methods=['GET', 'POST']):
 					'unplaced_pieces':gameSession['unplaced_pieces'],'phase':current_phase}})
 	# update same attributes from above in user's session cookie
 	session['board_state'], session['unplaced_pieces'], session['phase'] = board_state, unplaced_pieces, current_phase
+	print(board_state)
 
 
 @socketio.on('opposing board sync')
