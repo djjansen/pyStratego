@@ -195,41 +195,40 @@ def return_range(json, methods=['GET', 'POST']):
 	greaterBlockingCols = {'blocking':[11],'opposing':[10]}
 	lesserBlockingCols = {'blocking':[0],'opposing':[1]}
 
+	# check if square should block movement of another piece, modify the dicts above to help return viable moves
+	def check_if_block(square, dict, item, team=own_team):
+		if square['color'] not in ['water',own_team]:
+			dict['opposing'].append(item)
+		else:
+			dict['blocking'].append(item)
+
+	# iterate through rows and populate blocking dictionaries
 	for row in board_state:
+		# starting with rows
 		row_diff = ord(selectedRow) - ord(row)
 		if  abs(row_diff) <= moveRange and abs(row_diff) > 0:
 			row_index = ord(row) - 64
 			if board_state[row][selectedCol]['color'] != "none":
 				if row_diff > 0:
-					if board_state[row][selectedCol]['color'] not in ['water',own_team]:
-						lesserBlockingRows['opposing'].append(row_index)
-					else:
-						lesserBlockingRows['blocking'].append(row_index)
+					check_if_block(square=board_state[row][selectedCol], dict=lesserBlockingRows, item=row_index)
 				elif row_diff < 0:
-					if board_state[row][selectedCol]['color'] not in ['water',own_team]:
-						greaterBlockingRows['opposing'].append(row_index)
-					else:
-						greaterBlockingRows['blocking'].append(row_index)
+					check_if_block(square=board_state[row][selectedCol], dict=greaterBlockingRows, item=row_index)
 
-
+		# then with columns
 		if row_diff == 0:
 			for num in range(int(selectedCol) - moveRange, int(selectedCol) + moveRange + 1):
 				if num in range(1,11):
 					if board_state[row][str(num)]['color'] != 'none':
 						if num > int(selectedCol):
-							if board_state[row][str(num)]['color'] not in ['water',own_team]:
-								greaterBlockingCols['opposing'].append(num)
-							else:
-								greaterBlockingCols['blocking'].append(num)
+							check_if_block(square=board_state[row][str(num)], dict=greaterBlockingCols, item=num)
 						elif num < int(selectedCol):
-							if board_state[row][str(num)]['color'] not in ['water',own_team]:
-								lesserBlockingCols['opposing'].append(num)
-							else:
-								lesserBlockingCols['blocking'].append(num)
-					
+							check_if_block(square=board_state[row][str(num)], dict=lesserBlockingCols, item=num)
+
+			# sort the lists 		
 			greaterBlockingCols['opposing'].sort()
 			lesserBlockingCols['opposing'].sort(reverse=True)
 
+			# re-iterate through columns to add viable squares
 			for num in range(int(selectedCol) - moveRange, int(selectedCol) + moveRange + 1):
 				if num in range(1,11):
 					if board_state[row][str(num)]['color'] not in [own_team,'water']:
@@ -237,9 +236,11 @@ def return_range(json, methods=['GET', 'POST']):
 							if (num >= lesserBlockingCols['opposing'][0]) and (num <= greaterBlockingCols['opposing'][0]):
 								addViableSquare(ord(row) - 64,num)
 
+		# sort the row lists
 		greaterBlockingRows['opposing'].sort()
 		lesserBlockingRows['opposing'].sort(reverse=True)
 
+	# re-iterate through rows to add viable squares
 	for row in board_state:
 		row_diff = ord(selectedRow) - ord(row)
 		if  abs(row_diff) <= moveRange and abs(row_diff) > 0:
@@ -250,11 +251,10 @@ def return_range(json, methods=['GET', 'POST']):
 					if (row_index >= lesserBlockingRows['opposing'][0]) and (row_index <= greaterBlockingRows['opposing'][0]):
 						addViableSquare(row_index,int(selectedCol))
 
-	print('lesser blocking rows\n', lesserBlockingRows)
-	print('viable squares\n', viableSquares)
-
-
+	# send final viable quares to client
 	socketio.emit('return range', viableSquares)
+
+
 #when this file is run, start flask-socketio app
 if __name__ == '__main__':
     socketio.run(app, debug=True)
