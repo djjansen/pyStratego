@@ -103,7 +103,9 @@ def handle_board_state_change(json, methods=['GET', 'POST']):
 	#if two pieces from different teams collide, do battle
 
 	def combat(piece1,piece2):
-		if auth.pieces_reference[piece1['piece']].weakness == piece2['piece']:
+		if piece2['piece'] == '#':
+			result = 'victory'
+		elif auth.pieces_reference[piece1['piece']].weakness == piece2['piece']:
 			result = piece2
 		elif auth.pieces_reference[piece2['piece']].weakness == piece1['piece']:
 			result = piece1
@@ -118,6 +120,8 @@ def handle_board_state_change(json, methods=['GET', 'POST']):
 
 	if board_state[destination_row][destination_col]['color'] not in ['none',json['moved_piece']['color']]:
 		new_piece = combat(json['moved_piece'],board_state[destination_row][destination_col])
+		if new_piece == 'victory':
+			print('yay!')
 		json['moved_piece'] = new_piece
 		print(json)
 		socketio.emit('own combat result', json)
