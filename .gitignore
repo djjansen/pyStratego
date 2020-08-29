@@ -1,2 +1,5 @@
 __pycache__/*
 mongoMonitoring*
+.vscode/launch.json
+.vscode/settings.json
+.vscode/launch.json
