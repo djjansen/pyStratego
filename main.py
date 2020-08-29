@@ -131,11 +131,13 @@ def handle_board_state_change(json, methods=['GET', 'POST']):
 
 	board_state[destination_row][destination_col] = new_piece
 	
-	
+	# fetch room info from db
 	gameSession = db.fetchOne({'_id': ObjectId(room)})
+	# update unplaced pieces record
 	gameSession['unplaced_pieces'][username] = unplaced_pieces
 	current_phase = gameSession['phase']
-
+	
+	# sum up total pieces unplaced, change phases if necessary
 	total_pieces = 0
 	if current_phase == "preparation":
 		for user in gameSession['unplaced_pieces']:
@@ -156,27 +158,30 @@ def handle_board_state_change(json, methods=['GET', 'POST']):
 		current_phase = "blue"
 
 	json['phase'] = current_phase
+	# emit response to clients 
 	socketio.emit('my response', json, callback=messageReceived,room=room)
 
+	# update unplaced pieces record for this player, to be re-inserted in db below
 	gameSession['unplaced_pieces'][username] = unplaced_pieces
+	# update board state, phase, and unplaced pieces records in database
+	db.updateOne({'_id': ObjectId(room)},
+					{'$set':{'board_state':board_state,
+					'unplaced_pieces':gameSession['unplaced_pieces'],'phase':current_phase}})
+	# update same attributes from above in user's session cookie
+	session['board_state'], session['unplaced_pieces'], session['phase'] = board_state, unplaced_pieces, current_phase
 
-	db.updateOne({'_id': ObjectId(room)},{'$set':{'board_state':board_state,'unplaced_pieces':gameSession['unplaced_pieces'],'phase':current_phase}})
-	session['board_state'] = board_state
-	session['unplaced_pieces'] = unplaced_pieces
-	session['phase'] = current_phase
-	print(session.get('phase'))
 
 @socketio.on('opposing board sync')
 def sync_opposing_move(methods=['GET', 'POST']):
 	room = session.get('session_id')
 	gameSession = db.fetchOne({'_id': ObjectId(room)})
-	session['board_state'] = gameSession['board_state']
-	session['phase'] = gameSession['phase']
+	session['board_state'], session['phase'] = [gameSession[attribute] 
+												for attribute in ['board_state','phase']]
+
 
 @socketio.on('get range')
 def return_range(json, methods=['GET', 'POST']):
-	room = session.get('session_id')
-	board_state = session.get('board_state')
+	room, board_state  = (session.get(attribute) for attribute in ('session_id', 'board_state'))
 
 	selectedRow, selectedCol = json['coordinates'][0], json['coordinates'][1]
 	own_team = json['color']
