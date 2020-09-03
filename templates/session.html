@@ -33,6 +33,12 @@
         -webkit-transition: opacity .25s ease-in-out;
         opacity: 0.5;
       }
+      .faded-out {
+        transition: opacity .25s ease-in-out;
+        -moz-transition: opacity .25s ease-in-out;
+        -webkit-transition: opacity .25s ease-in-out;
+        opacity: 0.3;
+      }
       td {
         width: 9.09%;
         position: relative;
@@ -98,6 +104,7 @@
       </table>
       <div id='invalid_move_message'><br></div>
       <!-- Table for game board -->
+      <div id='board_container'>
       <table id="grid" class="board" border="1px solid black" border-collapse="collapse" width="90%">
             <tr>
                 <th></th>
@@ -119,6 +126,7 @@
             </tr>
           {% endfor %}
       </table>
+      </div>
       <script>
       window.phase = "{{ session.get('phase') }}"
       var own_team = "{{ session.get('color') }}";
@@ -238,6 +246,11 @@
             if (square.querySelector('.content').classList.contains('blue') === false && square.querySelector('.content').classList.contains('red') === false && square.querySelector('.content').classList.contains('water') === false) {square.querySelector('.content').classList.add('empty');}
         }
         }
+        else if (modification == 'removeListeners') {
+          function makeModification(square,movementRage) {
+            square.removeEventListener('click',handleData,false);
+          }
+        }
         else if (modification == 'highlightSquares') {
           function makeModification(square,movementRange) {
             if (window.phase == 'preparation') {
@@ -337,7 +350,8 @@
         } else {
             // actions for both players when a board state is sent from back end
             if ( msg.game_over === true) { 
-              console.log('yay! game over.')
+              modifyGrid('grid',modification='removeListeners');
+              document.getElementById('board_container').classList.add('faded-out')
             } else {
             window.phase = msg['phase'];
             showPhase(window.phase);
@@ -358,10 +372,8 @@
                 var payload = "";
               }
 
-              //document.getElementById(destination_row).querySelector('#' + CSS.escape(destination_col)).querySelector('.square').querySelector('.content').classList.add(opposing_team);
               var offboard_origin = msg['origin_cell'].includes("");
               if ( offboard_origin  === false) {
-                console.log('ffaaaallseee');
                 extractData(document.getElementById(origin_row).querySelector('#' + CSS.escape(origin_col)).querySelector('.square').querySelector('.content'));
               }
 
