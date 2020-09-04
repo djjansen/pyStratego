@@ -33,12 +33,6 @@
         -webkit-transition: opacity .25s ease-in-out;
         opacity: 0.5;
       }
-      .faded-out {
-        transition: opacity .25s ease-in-out;
-        -moz-transition: opacity .25s ease-in-out;
-        -webkit-transition: opacity .25s ease-in-out;
-        opacity: 0.3;
-      }
       td {
         width: 9.09%;
         position: relative;
@@ -72,6 +66,33 @@
         bottom: 0;
         left: 0;
         right: 0;
+      }
+      .popup {
+        position: fixed; /* Sit on top of the page content */
+        display: block; 
+        width: 100%; /* Full width (cover the whole page) */
+        height: 100%; /* Full height (cover the whole page) */
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0,0,0,0.75); /* Black background with opacity */
+        z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
+        cursor: pointer;
+      }
+      .popup_text{
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      font-size: 50px;
+      color: white;
+      transform: translate(-50%,-50%);
+      -ms-transform: translate(-50%,-50%);
+      background-color:#66635d
+      border-radius: 15px;
+      }
+      .popup_link {
+        color:white;
       }
   </style>
     <title>Flask_Chat_App</title>
@@ -351,7 +372,16 @@
             // actions for both players when a board state is sent from back end
             if ( msg.game_over === true) { 
               modifyGrid('grid',modification='removeListeners');
-              document.getElementById('board_container').classList.add('faded-out')
+              // document.getElementById('board_container').classList.add('faded-out');
+              console.log('creating div');
+              var game_over_div = document.createElement('div');
+              game_over_div.classList.add('popup');
+              var inner_message_div = document.createElement('div');
+              inner_message_div.classList.add('popup_text')
+              game_over_div.appendChild(inner_message_div);
+              inner_message_div.innerHTML = 'Hello!<br><a class="popup_link" href=https://www.espn.com>Return to Start</a>'
+              document.getElementById('board_container').appendChild(game_over_div);
+              console.log('div created');
             } else {
             window.phase = msg['phase'];
             showPhase(window.phase);
