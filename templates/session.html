@@ -374,12 +374,14 @@
               modifyGrid('grid',modification='removeListeners');
               // document.getElementById('board_container').classList.add('faded-out');
               console.log('creating div');
+              var winner = msg.responsible_team;
+              winner = winner.charAt(0).toUpperCase() + winner.slice(1);
               var game_over_div = document.createElement('div');
               game_over_div.classList.add('popup');
               var inner_message_div = document.createElement('div');
               inner_message_div.classList.add('popup_text')
               game_over_div.appendChild(inner_message_div);
-              inner_message_div.innerHTML = 'Hello!<br><a class="popup_link" href=https://www.espn.com>Return to Start</a>'
+              inner_message_div.innerHTML = winner + ' wins!<br><a class="popup_link" href={{ url_for('auth.logout') }}>Return to main menu</a>'
               document.getElementById('board_container').appendChild(game_over_div);
               console.log('div created');
             } else {
