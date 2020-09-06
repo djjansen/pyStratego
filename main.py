@@ -148,18 +148,21 @@ def handle_board_state_change(json, methods=['GET', 'POST']):
 		for user in gameSession['unplaced_pieces']:
 			for piece in gameSession['unplaced_pieces'][user]:
 				total_pieces += piece[1]
-
-		if total_pieces == 0:
+		# check if both players have entered the game and placed all their pieces
+		if (total_pieces == 0) and (len(gameSession['unplaced_pieces']) == 2):
 			current_phase = "blue"
-
-	elif json['game_over'] == True:
-		current_phase = json['responsible_team'] + '_wins'
 
 	elif current_phase == "blue":
 		current_phase = "red"
 	
 	elif current_phase == "red":
 		current_phase = "blue"
+
+	try:
+		if json['game_over'] == True:
+			current_phase = json['responsible_team'] + '_wins'
+	except KeyError:
+		pass
 
 	json['phase'] = current_phase
 	# emit response to clients 
