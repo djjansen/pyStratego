@@ -152,6 +152,19 @@
       window.phase = "{{ session.get('phase') }}"
       var own_team = "{{ session.get('color') }}";
 
+      // show victory overlay if game is over
+      function show_victory_screen(winner) {
+        var winner = winner;
+        winner = winner.charAt(0).toUpperCase() + winner.slice(1);
+        var game_over_div = document.createElement('div');
+        game_over_div.classList.add('popup');
+        var inner_message_div = document.createElement('div');
+        inner_message_div.classList.add('popup_text')
+        game_over_div.appendChild(inner_message_div);
+        inner_message_div.innerHTML = winner + ' wins!<br><a class="popup_link" href={{ url_for('auth.logout') }}>Return to main menu</a>'
+        document.getElementById('board_container').appendChild(game_over_div);
+      }
+
       // determine which message to show user about current phase
       function showPhase(phase) {
       var phase_div = document.getElementById("phase");
@@ -310,7 +323,11 @@
 
       modifyGrid('grid',modification='addListeners');
       modifyGrid('chest',modification='addListeners');
-
+      console.log(window.phase);
+      if (window.phase.includes('wins') === true) {
+        console.log('executing...');
+        show_victory_screen(window.phase.split('_')[0]);
+      }
       </script>
 
     <div class="message_holder">
@@ -372,18 +389,7 @@
             // actions for both players when a board state is sent from back end
             if ( msg.game_over === true) { 
               modifyGrid('grid',modification='removeListeners');
-              // document.getElementById('board_container').classList.add('faded-out');
-              console.log('creating div');
-              var winner = msg.responsible_team;
-              winner = winner.charAt(0).toUpperCase() + winner.slice(1);
-              var game_over_div = document.createElement('div');
-              game_over_div.classList.add('popup');
-              var inner_message_div = document.createElement('div');
-              inner_message_div.classList.add('popup_text')
-              game_over_div.appendChild(inner_message_div);
-              inner_message_div.innerHTML = winner + ' wins!<br><a class="popup_link" href={{ url_for('auth.logout') }}>Return to main menu</a>'
-              document.getElementById('board_container').appendChild(game_over_div);
-              console.log('div created');
+                show_victory_screen(msg.responsible_team);
             } else {
             window.phase = msg['phase'];
             showPhase(window.phase);

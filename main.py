@@ -147,14 +147,13 @@ def handle_board_state_change(json, methods=['GET', 'POST']):
 	if current_phase == "preparation":
 		for user in gameSession['unplaced_pieces']:
 			for piece in gameSession['unplaced_pieces'][user]:
-				print(piece)
 				total_pieces += piece[1]
-	
-		print(total_pieces)
 
 		if total_pieces == 0:
 			current_phase = "blue"
-			print('condition met....')
+
+	elif json['game_over'] == True:
+		current_phase = json['responsible_team'] + '_wins'
 
 	elif current_phase == "blue":
 		current_phase = "red"
