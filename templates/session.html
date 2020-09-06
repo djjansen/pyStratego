@@ -88,7 +88,6 @@
       color: white;
       transform: translate(-50%,-50%);
       -ms-transform: translate(-50%,-50%);
-      background-color:#66635d
       border-radius: 15px;
       }
       .popup_link {
@@ -169,7 +168,7 @@
         var inner_message_div = document.createElement('div');
         inner_message_div.classList.add('popup_text')
         game_over_div.appendChild(inner_message_div);
-        inner_message_div.innerHTML = winner + ' wins!<br><a class="popup_link" href={{ url_for('auth.logout') }}>Return to main menu</a>'
+        inner_message_div.innerHTML = winner + ' wins!<br><a class="popup_link" href={{ url_for("auth.logout") }}>Return to main menu</a>';
         document.getElementById('board_container').appendChild(game_over_div);
       }
 
