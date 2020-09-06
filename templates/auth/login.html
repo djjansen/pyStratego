@@ -1,35 +1,70 @@
 <!DOCTYPE html>
   <html lang="en">
   <head>
+    <link href='https://fonts.googleapis.com/css?family=Dosis' rel='stylesheet'>
     <title>Flask_Chat_App</title>
+    <style>
+        html, body {
+          height: 100%;
+          margin: 0;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          font-family: 'dosis';
+        }
+        button, .button {
+          font-family: 'dosis';
+          margin: 12px;
+        }
+        label {
+          font-family: 'dosis';
+        }
+       .card {
+          /* Add shadows to create the "card" effect */
+          box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+          border-radius: 15px;
+          transition: 0.3s;
+          padding: 16px;  
+          height: 75%;
+          width: 75%;   
+        }
+
+        /* On mouse-over, add a deeper shadow */
+        .card:hover {
+          box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+        }
+    </style>
   </head>
-  <body>  
-    <div id="firstChoice">
-      <script src="/static/login.js"></script>
-      <Button onclick="showForm('create')">Create Session</Button>
-      <Button onclick="showForm('join')">Join Session</Button>
-    </div>
+  <body>
+    <div class='card'>
+      <div id='title'><h1>PyStratego</h1></div>
+      <div id="firstChoice">
+        <script src="/static/login.js"></script>
+        <Button onclick="showForm('create')">Create Session</Button>
+        <Button onclick="showForm('join')">Join Session</Button>
+      </div>
 
-    <div style="display:none" id="joinGame">
-      <form action="" method="POST">
-        <label for="session_code">Session ID</label>
-        <input name="session_code" id="session_code" required><br>
-        <label for="username">Username</label>
-        <input name="username" id="username" required><br>
-        <label for="password">Password</label>
-        <input type="password" name="password" id="password" required><br>
-        <input type="submit"/>
-      </form>
-    </div>
+      <div style="display:none" id="joinGame">
+        <form action="" method="POST">
+          <label for="session_code">Session ID</label>
+          <input name="session_code" id="session_code" required><br>
+          <label for="username">Username</label>
+          <input name="username" id="username" required><br>
+          <label for="password">Password</label>
+          <input type="password" name="password" id="password" required><br>
+          <input type="submit" class='button' value='Join'/>
+        </form>
+      </div>
 
-    <div style="display:none" id="createGame">
-      <form action="" method="POST">
-        <label for="username">Username</label>
-        <input name="username" id="username" required><br>
-        <label for="password">Password</label>
-        <input type="password" name="password" id="password" required><br>
-        <input type="submit"/>
-      </form>
+      <div style="display:none" id="createGame">
+        <form action="" method="POST">
+          <label for="username">Username</label>
+          <input name="username" id="username" required><br>
+          <label for="password">Password</label>
+          <input type="password" name="password" id="password" required><br>
+          <input type="submit" class='button' value='Create'/>
+        </form>
+      </div>
     </div>
 
       
