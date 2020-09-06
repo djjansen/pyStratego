@@ -108,18 +108,26 @@
       <!-- table for pieces not on the board -->
       
       <table id="chest" border="1px solid black" border-collapse="collapse" width="90%">
-            {% set i = [] %}
+            {% set user_pieces = [] %}
+            {% set empty_squares = [] %}
             {% for piece in session.get('unplaced_pieces') %}
             {% if session.get('unplaced_pieces').index(piece) == 0 %}
               <tr>
             {% endif %}
             {% for x in range(piece[1]) %}
-            {% set __ = i.append(1) %}
+            {% set __ = user_pieces.append(1) %}
               <td><div class="square"><div class="content {{ session.get('color') }}">{{ piece[0] }}</div></div></td>
-            {% if i|length % 10 == 0 %}
+            {% if user_pieces|length % 10 == 0 %}
               </tr><tr>
             {% endif %}
             {% endfor %}
+            {% endfor %}
+            {% for extra_space in range(40 - user_pieces|length) %}
+              <td><div class="square"><div class="content empty"></div></div></td>
+            {% set __ = empty_squares.append(1) %}
+            {% if (user_pieces + empty_squares)|length % 10 == 0 %}
+              </tr><tr>
+            {% endif %}
             {% endfor %}
               </tr>
       </table>
