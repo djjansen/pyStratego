@@ -1,11 +1,13 @@
 <!DOCTYPE html>
   <html lang="en">
   <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href='https://fonts.googleapis.com/css?family=Dosis' rel='stylesheet'>
     <title>Flask_Chat_App</title>
     <style>
         html, body {
           height: 100%;
+          width: 100%;
           margin: 0;
           display: flex;
           justify-content: center;
@@ -19,6 +21,13 @@
         label {
           font-family: 'dosis';
         }
+        input[type=text], input[type=password] {
+            width: 80%;
+            padding: 8px;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid #000000;
+        }
        .card {
           /* Add shadows to create the "card" effect */
           box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
@@ -26,7 +35,9 @@
           transition: 0.3s;
           padding: 16px;  
           height: 75%;
-          width: 75%;   
+          width: 75%;
+          font-family: 'dosis';
+          font-size: 20px;
         }
 
         /* On mouse-over, add a deeper shadow */
@@ -40,18 +51,18 @@
       <div id='title'><h1>PyStratego</h1></div>
       <div id="firstChoice">
         <script src="/static/login.js"></script>
-        <Button onclick="showForm('create')">Create Session</Button>
+        <Button onclick="showForm('create')">Create Session</Button><br>
         <Button onclick="showForm('join')">Join Session</Button>
       </div>
 
       <div style="display:none" id="joinGame">
         <form action="" method="POST">
           <label for="session_code">Session ID</label>
-          <input name="session_code" id="session_code" required><br>
+          <input name="session_code" type='text' id="session_code" required><br>
           <label for="username">Username</label>
-          <input name="username" id="username" required><br>
+          <input name="username" type='text' id="username" required><br>
           <label for="password">Password</label>
-          <input type="password" name="password" id="password" required><br>
+          <input type="password" type='text'name="password" id="password" required><br>
           <input type="submit" class='button' value='Join'/>
         </form>
       </div>
@@ -59,9 +70,9 @@
       <div style="display:none" id="createGame">
         <form action="" method="POST">
           <label for="username">Username</label>
-          <input name="username" id="username" required><br>
+          <input name="username" type='text' id="username" required><br>
           <label for="password">Password</label>
-          <input type="password" name="password" id="password" required><br>
+          <input type="password" type='text' name="password" id="password" required><br>
           <input type="submit" class='button' value='Create'/>
         </form>
       </div>
