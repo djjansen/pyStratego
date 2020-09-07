@@ -110,7 +110,7 @@
         color:white;
       }
       .navbar {
-        background-color: gray;
+        background-color: #6c757d;
         color:whitesmoke;
         margin-bottom: 5px;
         z-index: 200;
@@ -138,6 +138,10 @@
       #chat {
         margin-top: 58px;
         background-color: rgb(223, 223, 223);
+        padding: 5px;
+      }
+      input[type=text] {
+        height: 38px;
       }
   </style>
     <title>Flask_Chat_App</title>
@@ -416,6 +420,7 @@
       }
       </script>
     <div id='chat' class='hidden'>
+    <span id='chat_header'><h4><b>Messages</b></h4></span>
     <div class="message_holder">
       {% block content %}
           <!-- {% if g.messages %} -->
@@ -427,7 +432,7 @@
       {% endblock %}
     </div>
     <form action="" method="POST">
-      <input type="text" class="message" placeholder="Messages"/>
+      <input type="text" class="message" placeholder="Type to chat" height='44'/>
       <input type="submit" class='button btn btn-secondary' value='Send'/>
     </form>
   </div>
