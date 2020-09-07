@@ -2,6 +2,7 @@
   <html lang="en">
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
     <link href='https://fonts.googleapis.com/css?family=Dosis' rel='stylesheet'>
     <title>Flask_Chat_App</title>
     <style>
@@ -9,10 +10,11 @@
           height: 100%;
           width: 100%;
           margin: 0;
+          font-family: 'dosis';
           display: flex;
           justify-content: center;
           align-items: center;
-          font-family: 'dosis';
+          background-color: #DB443D;
         }
         button, .button {
           font-family: 'dosis';
@@ -31,6 +33,8 @@
        .card {
           /* Add shadows to create the "card" effect */
           box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+          background-color: white;
+          position: absolute;
           border-radius: 15px;
           transition: 0.3s;
           padding: 16px;  
@@ -38,21 +42,32 @@
           width: 75%;
           font-family: 'dosis';
           font-size: 20px;
+          z-index: 10;
         }
 
         /* On mouse-over, add a deeper shadow */
         .card:hover {
           box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
         }
+        .clipped {
+          position: relative;
+          width: 100%;
+          height: 100%;
+          -webkit-clip-path: polygon(0 0, 100% 0, 100% 55%, 0 45%);
+          clip-path: polygon(0 0, 100% 0, 100% 55%, 0 45%);
+          z-index: 5;
+          background-color: #2888DB;
+        }
     </style>
   </head>
   <body>
+    <div class='clipped'></div>
     <div class='card'>
       <div id='title'><h1>PyStratego</h1></div>
       <div id="firstChoice">
         <script src="/static/login.js"></script>
-        <Button onclick="showForm('create')">Create Session</Button><br>
-        <Button onclick="showForm('join')">Join Session</Button>
+        <Button class="btn btn-secondary" onclick="showForm('create')">Create Session</Button><br>
+        <Button class="btn btn-secondary" onclick="showForm('join')">Join Session</Button>
       </div>
 
       <div style="display:none" id="joinGame">
@@ -63,7 +78,7 @@
           <input name="username" type='text' id="username" required><br>
           <label for="password">Password</label>
           <input type="password" type='text'name="password" id="password" required><br>
-          <input type="submit" class='button' value='Join'/>
+          <input type="submit" class='button btn btn-secondary' value='Join'/>
         </form>
       </div>
 
@@ -73,7 +88,7 @@
           <input name="username" type='text' id="username" required><br>
           <label for="password">Password</label>
           <input type="password" type='text' name="password" id="password" required><br>
-          <input type="submit" class='button' value='Create'/>
+          <input type="submit" class='button btn btn-secondary' value='Create'/>
         </form>
       </div>
     </div>
