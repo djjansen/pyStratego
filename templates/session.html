@@ -1,28 +1,35 @@
 <!DOCTYPE html>
   <html lang="en">
   <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
+      body {
+        background-color: #454544;
+      }
       table, th, td {
-        border: 1px solid black;
+        border: 0.5px solid #c9c9c9;
         border-collapse: collapse;
+        color: #c9c9c9;
       }
       .click a {
         display: block;
       }
-      .board table {
+      table {
         width: 90%;
       }
       .blue {
-        background-color: blue;
+        background-color:#2888DB;
       }
       .red {
-        background-color: red;
+        background-color: #DB443D;
       }
       .water {
-        background-color: #03c6fc;
+        background-color: #1DDBCF;
+        opacity: 0.5;
       }
       .empty {
-        background-color: antiquewhite;
+        background-color: #2e2e2e;
+        opacity: 0.5
       }
       .out_of_range {
         filter: brightness(60%);
@@ -58,7 +65,7 @@
       }
       .row-header {
         font-size:5vw;
-        color:black;
+        color:#c9c9c9;
         text-align:center;
         vertical-align: bottom;
         position: absolute;
