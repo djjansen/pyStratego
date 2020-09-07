@@ -1,7 +1,11 @@
 <!DOCTYPE html>
   <html lang="en">
   <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link href='https://fonts.googleapis.com/css?family=Dosis' rel='stylesheet'>
     <style>
       body {
@@ -12,6 +16,7 @@
         border: 0.5px solid #4b4949;
         border-collapse: collapse;
         color: #585454;
+        text-align: center;
       }
       .click a {
         display: block;
@@ -44,9 +49,9 @@
         opacity: 0.5;
       }
       td {
-        width: 9.15%;
+        width: 9.1%;
         position: relative;
-        padding-bottom: 4px;
+        padding-bottom: 6px;
       }
       td:after {
         content: '';
@@ -104,17 +109,68 @@
       .popup_link {
         color:white;
       }
+      .navbar {
+        background-color: gray;
+        color:whitesmoke;
+        margin-bottom: 5px;
+        z-index: 200;
+      }
+      .bold {
+        font-weight: bolder;
+        color:whitesmoke;
+      }
+      .fullscreen{
+        display: inline;
+        z-index: 100; 
+        width: 100%; 
+        max-height: 100%; 
+        position: fixed; 
+        top: 0; 
+        left: 0; 
+      }
+      .hidden {
+        display: none;
+      }
+      .svg_button {
+        border:none;
+        background-color: transparent;
+      }
+      #chat {
+        margin-top: 58px;
+        background-color: rgb(223, 223, 223);
+      }
   </style>
     <title>Flask_Chat_App</title>
   </head>
   <body>
-    <h1>{{ session.get('user_id') }}</h1>
-    <div id="phase"></div>
-     <ul>
-      <li><a href="{{ url_for('auth.logout') }}">Log Out</a>
-    </ul>
-      <h2>Game Code</h2>
-      <h3>{{ session.get('session_code') }}</h3>
+        <div>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+          <div id="phase"></div>&emsp;&emsp;
+          <button class='svg_button' onclick='toggle_chat(document.getElementById("chat"))'><svg width="2em" height="2em" viewBox="0 0 16 16" class="bi bi-chat-left-dots" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path fill='whitesmoke' fill-rule="evenodd" d="M14 1H2a1 1 0 0 0-1 1v11.586l2-2A2 2 0 0 1 4.414 11H14a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 0a2 2 0 0 0-2 2v12.793a.5.5 0 0 0 .854.353l2.853-2.853A1 1 0 0 1 4.414 12H14a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+            <path fill='whitesmoke' d="M5 6a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+          </svg></button>&emsp;&emsp;
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarText">
+            <span class="navbar-text">
+            <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-person-circle" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <path d="M13.468 12.37C12.758 11.226 11.195 10 8 10s-4.757 1.225-5.468 2.37A6.987 6.987 0 0 0 8 15a6.987 6.987 0 0 0 5.468-2.63z"/>
+              <path fill-rule="evenodd" d="M8 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+              <path fill-rule="evenodd" d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z"/>
+            </svg>
+            {{ session.get('user_id') }}&emsp;&emsp;
+          </span><br>
+            <span class="navbar-text">
+              Your Session Code is <span class='bold'>{{ session.get('session_code') }}&emsp;&emsp;</span>
+            </span><br>
+            <span>
+              <a class='bold' href="{{ url_for('auth.logout') }}">Log Out</a>
+            </span>
+          </div>
+        </nav>
+      </div>
       <!-- table for pieces not on the board -->
       <table id="chest" border="1px solid black" border-collapse="collapse" width="90%">
               {% set user_pieces = [] %}
@@ -194,6 +250,16 @@
       else if (window.phase !== "game_over") {
         phase_div.innerHTML = "<h3>Opponent's Turn</h3>";
       }
+      }
+
+      function toggle_chat(ele) {
+        if (ele.classList.contains('hidden') === true) {
+          ele.classList.add('fullscreen');
+          ele.classList.remove('hidden');
+        } else {
+          ele.classList.add('hidden');
+          ele.classList.remove('fullscreen');
+        }
       }
 
       // show phase when page loads
@@ -346,7 +412,7 @@
         show_victory_screen(window.phase.split('_')[0]);
       }
       </script>
-
+    <div id='chat' class='hidden'>
     <div class="message_holder">
       {% block content %}
           <!-- {% if g.messages %} -->
@@ -359,8 +425,9 @@
     </div>
     <form action="" method="POST">
       <input type="text" class="message" placeholder="Messages"/>
-      <input type="submit"/>
+      <input type="submit" class='button btn btn-secondary' value='Send'/>
     </form>
+  </div>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
@@ -467,6 +534,10 @@
       })
       
     </script>
-
+        <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
   </body>
   </html>
