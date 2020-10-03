@@ -120,7 +120,8 @@
         color:whitesmoke;
       }
       .fullscreen{
-        display: inline;
+        display: flex;
+        flex-direction: column-reverse;
         z-index: 100; 
         width: 100%; 
         max-height: 100%; 
@@ -139,6 +140,21 @@
         margin-top: 58px;
         background-color: rgb(223, 223, 223);
         padding: 5px;
+      }
+      #msg_holder {
+        height: calc(100vh - 122px); /* space for fixed navbar (48px), "main" title (71px), footer (53px) */
+        overflow-y: scroll;
+        overscroll-behavior-y: contain;
+        scroll-snap-type: y proximity;
+      }
+      #msg_holder > div:last-child {
+        scroll-snap-align: end;
+      }      
+      #msg_entry {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        padding: 15px;
       }
       input[type=text] {
         height: 38px;
@@ -225,6 +241,9 @@
             {% endfor %}
         </table>
       </div>
+          <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
       <script>
       window.phase = "{{ session.get('phase') }}"
       var own_team = "{{ session.get('color') }}";
@@ -256,6 +275,18 @@
       }
       }
 
+      function scroll_chat(x) {
+        var height = 0;
+        $('div.msg').each(function(i, value){
+            height += parseInt($(this).height()) * 200;
+        });
+
+        height += '';
+
+        $('div#msg_holder').animate({scrollTop: height});
+        console.log('scrolled');
+      }
+
       function toggle_element(ele) {
         if (ele.classList.contains('hidden') === true) {
           ele.classList.add('fullscreen');
@@ -264,6 +295,7 @@
           ele.classList.add('hidden');
           ele.classList.remove('fullscreen');
         }
+        scroll_chat("x");
       }
 
       // show phase when page loads
@@ -420,26 +452,23 @@
       }
       </script>
     <div id='chat' class='hidden'>
-    <span id='chat_header'><h4><b>Messages</b></h4></span>
-    <div class="message_holder">
+      <div id="msg_holder">
       {% block content %}
           <!-- {% if g.messages %} -->
             {% for message in g.messages %}
             <div><b style="color: #000">{{ message['user_name'] }}  </b>
-            {{ message['message'] }}</div>
+            {{ message['message'] }}
+            </div>
             {% endfor %}
           <!-- {% endif %} -->
       {% endblock %}
-    </div>
-    <form action="" method="POST">
-      <input type="text" class="message" placeholder="Type to chat" height='44'/>
-      <input type="submit" class='button btn btn-secondary' value='Send'/>
-    </form>
+      <div id="msg_entry">
+        <form action="" method="POST">
+          <input type="text" class="message" placeholder="Type to chat" height='44'/>
+          <input type="submit" class='button btn btn-secondary' value='Send'/>
+        </form>
+      </div>
   </div>
-
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
     <script type="text/javascript">
       var socket = io.connect('http://' + document.domain + ':' + location.port);
       var session_id = "{{ session.get('session_id') }}";
@@ -449,33 +478,34 @@
           data: 'User Connected'
         } );
 
-        console.log('Creating game...');
-        socket.emit('create', {
-          data: '{{ g.session_id }}'
-        });
+      console.log('Creating game...');
+      socket.emit('create', {
+        data: '{{ g.session_id }}'
+      });
 
-        // message handler for the 'join_room' channel
-        socket.on('join_room', function(msg) {
-            console.log(msg);
-        });
+      // message handler for the 'join_room' channel
+      socket.on('join_room', function(msg) {
+          console.log(msg);
+      });
 
-        var form = $( 'form' ).on( 'submit', function( e ) {
-          e.preventDefault()
-          let user_name = '{{ session.get("user_id") }}'
-          let user_input = $( 'input.message' ).val()
-          socket.emit( 'chat message', {
-            user_name : user_name,
-            message : user_input
-          } )
-          $( 'input.message' ).val( '' ).focus()
+      var form = $( 'form' ).on( 'submit', function( e ) {
+        e.preventDefault()
+        let user_name = '{{ session.get("user_id") }}'
+        let user_input = $( 'input.message' ).val()
+        socket.emit( 'chat message', {
+          user_name : user_name,
+          message : user_input
         } )
+        $( 'input.message' ).val( '' ).focus()
+      } )
       } )
 
 
       socket.on( 'my response', function( msg ) {
         // check if response is chat message
         if ( typeof msg.user_name !== 'undefined' ) {
-          $( 'div.message_holder' ).append( '<div><b style="color: #000">'+msg.user_name+'</b> '+msg.message+'</div>' )
+          $( 'div#msg_holder' ).append( '<div class="msg"><b style="color: #000">'+msg.user_name+'</b> '+msg.message+'</div>' );
+          scroll_chat("x");
         // otherwise handle as board state
         } else {
             // actions for both players when a board state is sent from back end
@@ -547,7 +577,7 @@
     </script>
         <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
   </body>
