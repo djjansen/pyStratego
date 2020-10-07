@@ -445,9 +445,13 @@
       modifyGrid('grid',modification='addListeners');
       modifyGrid('chest',modification='addListeners');
       console.log(window.phase);
+
       if (document.getElementById('chest').classList.contains('hidden') === false) {
-        toggle_element(document.getElementById('chest'));
-      }
+        if (window.phase !== 'preparation') {
+          toggle_element(document.getElementById('chest'));
+          }
+        }
+
       if (window.phase.includes('wins') === true) {
         console.log('executing...');
         show_victory_screen(window.phase.split('_')[0]);
