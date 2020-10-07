@@ -243,220 +243,6 @@
             {% endfor %}
         </table>
       </div>
-          <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
-      <script>
-      window.phase = "{{ session.get('phase') }}"
-      var own_team = "{{ session.get('color') }}";
-
-      // show victory overlay if game is over
-      function show_victory_screen(winner) {
-        var winner = winner;
-        winner = winner.charAt(0).toUpperCase() + winner.slice(1);
-        var game_over_div = document.createElement('div');
-        game_over_div.classList.add('popup');
-        var inner_message_div = document.createElement('div');
-        inner_message_div.classList.add('popup_text')
-        game_over_div.appendChild(inner_message_div);
-        inner_message_div.innerHTML = winner + ' wins!<br><a class="popup_link" href={{ url_for("auth.logout") }}>Return to main menu</a>';
-        document.getElementById('board_container').appendChild(game_over_div);
-      }
-
-      // determine which message to show user about current phase
-      function showPhase(phase) {
-      var phase_div = document.getElementById("phase");
-      if (window.phase === 'preparation') {
-        phase_div.innerHTML = "<h3>Set Your Pieces</h3>";
-      }
-      else if (window.phase === own_team) {
-        phase_div.innerHTML = "<h3>Your Turn</h3>";
-      }
-      else if (window.phase !== "game_over") {
-        phase_div.innerHTML = "<h3>Opponent's Turn</h3>";
-      }
-      }
-
-      function scroll_chat(x) {
-        var height = 0;
-        $('div.msg').each(function(i, value){
-            height += parseInt($(this).height()) * 200;
-        });
-
-        height += '';
-
-        $('div#msg_holder').animate({scrollTop: height});
-        console.log('scrolled');
-      }
-
-      function toggle_element(ele) {
-        if (ele.classList.contains('hidden') === true) {
-          ele.classList.add('fullscreen');
-          ele.classList.remove('hidden');
-        } else {
-          ele.classList.add('hidden');
-          ele.classList.remove('fullscreen');
-        }
-        scroll_chat("x");
-      }
-
-      // show phase when page loads
-      showPhase(window.phase);
-
-
-      function extractData(target) {
-      target.classList.add("selected");
-      window.transfer_payload = target.innerHTML.trim();
-      }
-
-      function loadData(target,payload = window.transfer_payload,team=own_team,sync_board=false) {
-      var origin = document.getElementsByClassName("selected")[0]
-      if ( origin !== undefined ) {
-        var origin_coords = [origin.parentNode.parentNode.parentNode.id,origin.parentNode.parentNode.id];
-        origin.classList.remove("selected","blue","red");
-        origin.classList.add('empty');
-        origin.innerHTML = "";
-      };
-
-      var target_coords = [target.parentNode.parentNode.parentNode.id,target.parentNode.parentNode.id];
-      if (target.classList.contains('empty') || sync_board==true) {
-        target.innerHTML = payload;
-        target.classList.remove('empty','blue','red');
-        target.classList.add(team);    
-      } 
-
-      delete window.transfer_payload;
-
-      return {
-            origin_cell : origin_coords,
-            destination_cell : target_coords,
-            moved_piece : {'color':team,'piece':payload},
-            phase : window.phase,
-            responsible_team : team
-          };
-      }
-
-      function handleData(evt) {
-      var team = "{{ session.get('color') }}";
-      var clickedOn = evt.target;
-
-      function setMessage(message) {
-        document.getElementById("invalid_move_message").innerHTML = message;
-      }
-      // check if existing payload is in browser
-      if (typeof window.transfer_payload !== 'undefined') {
-        // check if user is trying to move piece to same square
-        if (clickedOn.classList.contains('selected') === false) {
-              // check if user is trying to move where they already have another piece
-              if (clickedOn.classList.contains(team) === false) {
-                // check if user is trying to move to the water
-                if (clickedOn.classList.contains('water') === false) {
-                  //send new board state to back end, render changes in client
-                  if (clickedOn.classList.contains('out_of_range') === false) {
-                    socket.emit( 'board state', loadData(clickedOn) );
-                    modifyGrid('grid',modification='clearHighlighting');
-                    return false;
-                  }
-                } else {
-                    setMessage('pieces don\'t float!');
-                    setTimeout(setMessage, 2000,'<br>');                  
-                }
-            } else {
-                  setMessage('you already have a piece there');
-                  setTimeout(setMessage, 2000,'<br>');
-            }
-          }
-        // if move is invalid, get selected grid square, and remove class
-        document.getElementsByClassName("selected")[0].classList.remove("selected");
-        delete window.transfer_payload;
-        modifyGrid('grid',modification='clearHighlighting');
-        // if payload does not already exist & square is controlled by own team, extract from grid square
-      } 
-      else if (clickedOn.classList.contains(team) && (window.phase === team || window.phase === "preparation")) {
-        extractData(clickedOn);
-        if (clickedOn.classList.contains(team) && window.phase === team) {
-             var selected = document.getElementsByClassName("selected")[0];
-             if ( selected !== undefined ) {
-              var selected_coords = [selected.parentNode.parentNode.parentNode.id,selected.parentNode.parentNode.id];
-              window.transfer_payload = selected.innerHTML.trim();
-              socket.emit('get range', { 'coordinates': selected_coords, 'color': own_team });
-          }
-        }
-        modifyGrid('grid',modification='highlightSquares');
-      }
-    }
-
-        function modifyGrid(table,modification=undefined,movementRange=undefined) {
-          var grid = document.getElementById(table);
-
-          if (table == 'grid') {
-            rowStart = 1;
-          } else {
-            rowStart = 0;
-          }
-
-        if (modification == 'addListeners') {
-          function makeModification(square,movementRange) {
-            square.addEventListener('click',handleData,false);
-            if (square.querySelector('.content').classList.contains('blue') === false && square.querySelector('.content').classList.contains('red') === false && square.querySelector('.content').classList.contains('water') === false) {square.querySelector('.content').classList.add('empty');}
-        }
-        }
-        else if (modification == 'removeListeners') {
-          function makeModification(square,movementRage) {
-            square.removeEventListener('click',handleData,false);
-          }
-        }
-        else if (modification == 'highlightSquares') {
-          function makeModification(square,movementRange) {
-            if (window.phase == 'preparation') {
-              if (own_team == 'blue') {
-                if (i > 4) {square.querySelector('.content').classList.add('out_of_range');}
-              }
-              else if (own_team == 'red') {
-                if (i < 7) {square.querySelector('.content').classList.add('out_of_range');}
-              }
-            } 
-            else if (window.phase == own_team) {
-              if (movementRange !== undefined) {
-                console.log('change me');
-                if (movementRange[i] == undefined || movementRange[i].includes(j) == false) {
-                  square.querySelector('.content').classList.add('out_of_range');
-                }
-              }
-            }
-          }
-        } else if (modification == 'clearHighlighting') {
-          function makeModification(square,movementRange) {
-            square.querySelector('.content').classList.remove('out_of_range');
-          }
-        }
-
-        for (var i = rowStart, row; row = grid.rows[i]; i++) {
-          // iterate through rows
-          // rows would be accessed using the "row" variable assigned in the for loop
-          for (var j = rowStart, col; col = row.cells[j]; j++) {
-            // iterate through columns
-            // columns would be accessed using the "col" variable assigned in the for loop
-            makeModification(col.querySelector('.square'),movementRange);
-          }  
-        }
-      }
-
-      modifyGrid('grid',modification='addListeners');
-      modifyGrid('chest',modification='addListeners');
-      console.log(window.phase);
-
-      if (document.getElementById('chest').classList.contains('hidden') === false) {
-        if (window.phase !== 'preparation') {
-          toggle_element(document.getElementById('chest'));
-          }
-        }
-
-      if (window.phase.includes('wins') === true) {
-        console.log('executing...');
-        show_victory_screen(window.phase.split('_')[0]);
-      }
-      </script>
     <div id='chat' class='hidden'>
       <div id="msg_holder">
       {% block content %}
@@ -475,7 +261,34 @@
         </form>
       </div>
   </div>
-    <script type="text/javascript">
+              <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
+    <script src="/static/session.js"></script>
+    <script>
+      // set initial variables
+      window.phase = "{{ session.get('phase') }}"
+      window.own_team = "{{ session.get('color') }}";
+
+      // show phase when page loads
+      showPhase(window.phase);
+
+      // add event listeners to grid tables to make squares clickable
+      modifyGrid('grid',modification='addListeners');
+      modifyGrid('chest',modification='addListeners');
+
+      // if chest is not hidden and phase is not prep, hide it
+      if (document.getElementById('chest').classList.contains('hidden') === false) {
+        if (window.phase !== 'preparation') {
+          toggle_element(document.getElementById('chest'));
+          }
+        }
+
+      // if victory condition is met, show victory screen
+      if (window.phase.includes('wins') === true) {
+        show_victory_screen(window.phase.split('_')[0], '{{ url_for("auth.logout") }}');
+      }
+
       var socket = io.connect('http://' + document.domain + ':' + location.port);
       var session_id = "{{ session.get('session_id') }}";
 
@@ -528,14 +341,14 @@
             // handling of board states received by backend for opposing moves only
             // modifies front end based on change
             console.log(msg);
-            if ( own_team !== msg['responsible_team'] ) {
+            if ( window.own_team !== msg['responsible_team'] ) {
               var origin_row = msg['origin_cell'][0];
               var origin_col = msg['origin_cell'][1];
               var destination_row = msg['destination_cell'][0];
               var destination_col = msg['destination_cell'][1];
               var team = msg['moved_piece']['color'];
 
-              if ( team == own_team) {
+              if ( team == window.own_team) {
                 var payload = msg['moved_piece']['piece'];
               } else {
                 var payload = "";
@@ -555,20 +368,20 @@
 
       socket.on( 'return range', function( msg ) {
         console.log(msg['phase']);
-        if (window.phase === own_team) {
+        if (window.phase === window.own_team) {
           modifyGrid('grid',modification='highlightSquares',movementRange=msg);
         }
       })
 
       socket.on( 'own combat result', function( msg ) {
-        if (window.phase === own_team) {
+        if (window.phase === window.own_team) {
           var destination_row = msg['destination_cell'][0];
           var destination_col = msg['destination_cell'][1];
           console.log( 'hiiii' );
           console.log( msg )
           var winning_team = msg['moved_piece']['color'];
           console.log(winning_team);
-          if (winning_team === own_team) {
+          if (winning_team === window.own_team) {
             var payload = msg['moved_piece']['piece'];
           } else {
             var payload = "";
