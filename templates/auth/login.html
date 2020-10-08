@@ -4,61 +4,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
     <link href='https://fonts.googleapis.com/css?family=Dosis' rel='stylesheet'>
+    <link rel="stylesheet" href="/static/login.css">
     <title>Flask_Chat_App</title>
-    <style>
-        html, body {
-          height: 100%;
-          width: 100%;
-          margin: 0;
-          font-family: 'dosis';
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          background-color: #DB443D;
-        }
-        button, .button {
-          font-family: 'dosis';
-          margin: 12px;
-        }
-        label {
-          font-family: 'dosis';
-        }
-        input[type=text], input[type=password] {
-            width: 80%;
-            padding: 8px;
-            background: transparent;
-            border: none;
-            border-bottom: 1px solid #000000;
-        }
-       .card {
-          /* Add shadows to create the "card" effect */
-          box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-          background-color: white;
-          position: absolute;
-          border-radius: 15px;
-          transition: 0.3s;
-          padding: 16px;  
-          height: 75%;
-          width: 75%;
-          font-family: 'dosis';
-          font-size: 20px;
-          z-index: 10;
-        }
-
-        /* On mouse-over, add a deeper shadow */
-        .card:hover {
-          box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
-        }
-        .clipped {
-          position: relative;
-          width: 100%;
-          height: 100%;
-          -webkit-clip-path: polygon(0 0, 100% 0, 100% 55%, 0 45%);
-          clip-path: polygon(0 0, 100% 0, 100% 55%, 0 45%);
-          z-index: 5;
-          background-color: #2888DB;
-        }
-    </style>
   </head>
   <body>
     <div class='clipped'></div>
