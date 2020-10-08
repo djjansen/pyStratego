@@ -6,7 +6,7 @@ Repository for app to facilitate online stratego games
 * socket.io 
 * MongoDB
 * Bootstrap
-* javscript (vanilla & jQuery)
+* javascript (vanilla & jQuery)
 
 ## Installation
 
