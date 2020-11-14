@@ -8,6 +8,8 @@ Repository for app to facilitate online stratego games
 * Bootstrap
 * javascript (vanilla & jQuery)
 
+See diagrams in `Documentation` directory for more details on information flow in the app.
+
 ## Installation
 
 Run `pip install -r requirements.txt` to install the necessary python packages. 
