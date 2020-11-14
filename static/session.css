@@ -148,6 +148,7 @@ body {
     background-color: rgb(223, 223, 223);
     width: 100%;
   }
+  #close_chat
   input[type=text] {
     height: 38px;
   }

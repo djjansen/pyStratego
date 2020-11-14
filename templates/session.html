@@ -13,11 +13,7 @@
   <body>
         <div>
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-          <div id="phase"></div>&emsp;&emsp;
-          <button class='svg_button' onclick='toggle_element(document.getElementById("chat"))'><svg width="2em" height="2em" viewBox="0 0 16 16" class="bi bi-chat-left-dots" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path fill='whitesmoke' fill-rule="evenodd" d="M14 1H2a1 1 0 0 0-1 1v11.586l2-2A2 2 0 0 1 4.414 11H14a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 0a2 2 0 0 0-2 2v12.793a.5.5 0 0 0 .854.353l2.853-2.853A1 1 0 0 1 4.414 12H14a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
-            <path fill='whitesmoke' d="M5 6a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
-          </svg></button>&emsp;&emsp;
+          <div id="phase"></div>
           <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
           </button>
@@ -29,7 +25,13 @@
               <path fill-rule="evenodd" d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z"/>
             </svg>
             {{ session.get('user_id') }}&emsp;&emsp;
-          </span><br>
+            </span><br>
+            <span>
+              <button class='svg_button' onclick='toggle_element(document.getElementById("chat"))' data-toggle="collapse" data-target=".navbar-collapse.show"><svg width="2em" height="2em" viewBox="0 0 16 16" class="bi bi-chat-left-dots" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path fill='whitesmoke' fill-rule="evenodd" d="M14 1H2a1 1 0 0 0-1 1v11.586l2-2A2 2 0 0 1 4.414 11H14a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 0a2 2 0 0 0-2 2v12.793a.5.5 0 0 0 .854.353l2.853-2.853A1 1 0 0 1 4.414 12H14a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+                <path fill='whitesmoke' d="M5 6a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+              </svg></button>
+            </span><br>
             <span class="navbar-text">
               Your Session Code is <span class='bold'>{{ session.get('session_code') }}&emsp;&emsp;</span>
             </span><br>
@@ -91,6 +93,8 @@
       </div>
     <div id='chat' class='hidden'>
       <div id="msg_holder">
+        <button id='close_chat' class="close" aria-label="Close" onclick='toggle_element(document.getElementById("chat"))'>
+          <span aria-hidden="true"></span> &nbsp;x&nbsp;</button> 
       {% block content %}
           <!-- {% if g.messages %} -->
             {% for message in g.messages %}
